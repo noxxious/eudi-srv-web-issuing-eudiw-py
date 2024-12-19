@@ -41,6 +41,7 @@ import requests
 import urllib.parse
 from app.lighttoken import handle_response
 from app.validate_vp_token import validate_vp_token
+from urllib.parse import urljoin
 
 from boot_validate import (
     validate_mandatory_args,
@@ -198,7 +199,7 @@ def dynamic_R1(country):
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,
             optional_attributes=attributesForm2,
-            redirect_url=cfgserv.service_url + "dynamic/form",
+            redirect_url=urljoin(cfgserv.service_url, "dynamic/form"),
         )
 
     if country == "LT":
@@ -417,7 +418,7 @@ def red():
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
-        return render_template("dynamic/form_authorize.html", presentation_data=form_data, user_id=user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+        return render_template("dynamic/form_authorize.html", presentation_data=form_data, user_id=user_id, redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet") )
 
     elif session["country"] is None:
 
@@ -538,7 +539,7 @@ def red():
 
     user_id=session["country"] + "." + session["access_token"]
 
-    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id=user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id=user_id, redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet" ))
 
 
 
@@ -874,9 +875,9 @@ def auth():
 
     choice = request.form.get("optionsRadios")
     if choice == "link1":
-        return redirect(cfgserv.service_url + "oid4vp")
+        return redirect(urljoin(cfgserv.service_url, "oid4vp"))
     elif choice == "link2":
-        return redirect(cfgserv.service_url + "dynamic/")
+        return redirect(urljoin(cfgserv.service_url, "dynamic/"))
 
 @dynamic.route("/form", methods=["GET", "POST"])
 def Dynamic_form():
@@ -1046,7 +1047,7 @@ def Dynamic_form():
                     presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
 
-    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet" ))
 
 
 @dynamic.route("/test_case_form", methods=["GET", "POST"])

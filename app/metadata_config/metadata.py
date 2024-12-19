@@ -1,5 +1,6 @@
 import os
 import json
+from urllib.parse import urljoin
 
 from ..app_config.config_service import ConfService
 
@@ -9,10 +10,12 @@ from .openid_configuration import build_openid_configuration
 def build_metadata(cfgserv: ConfService):
     oidc_metadata = {
         "credential_issuer": cfgserv.service_url,
-        "credential_endpoint": cfgserv.service_url + "/credential",
-        "batch_credential_endpoint": cfgserv.service_url + "/batch_credential",
-        "notification_endpoint": cfgserv.service_url + "/notification",
-        "deferred_credential_endpoint": cfgserv.service_url + "/deferred_credential",
+        "credential_endpoint": urljoin(cfgserv.service_url, "/credential"),
+        "batch_credential_endpoint": urljoin(cfgserv.service_url, "/batch_credential"),
+        "notification_endpoint": urljoin(cfgserv.service_url, "/notification"),
+        "deferred_credential_endpoint": urljoin(
+            cfgserv.service_url, "/deferred_credential"
+        ),
         "credential_configurations_supported": {},
     }
     openid_metadata = build_openid_configuration(cfgserv)

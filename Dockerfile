@@ -4,20 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir -p /app
 
-#RUN apt-get update && apt-get install -y \
-#    python3.10 \
-#    python3.10-venv \
-#    python3.10-dev \
-#    python3-pip \
-#    git \
-#    gcc \
-#    build-essential \
-#    libssl-dev \
-#    && apt-get clean \
-#    && rm -rf /var/lib/apt/lists/*
-
 COPY app/requirements.txt /requirements.txt
-#RUN git clone https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py.git /app
 
 WORKDIR /
 
@@ -30,15 +17,12 @@ RUN python3 -m venv venv \
 
 FROM python:3.12
 
-#RUN apt-get update && apt-get install -y \
-#    python3.10 \
-#    && rm -rf /var/lib/apt/lists/*
-
 RUN mkdir -p /tmp/log_dev \
     && chmod -R 755 /tmp/log_dev \
     && mkdir -p /etc/eudiw/pid-issuer/cert \
     && mkdir -p /etc/eudiw/pid-issuer/privkey
 
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /venv /venv
 COPY ./app /app
 
@@ -56,6 +40,7 @@ ENV FLASK_RUN_HOST=$HOST
 ENV REQUESTS_CA_BUNDLE=/app/secrets/cert.pem
 ENV USE_GCP_LOGGER=0
 ENV USE_FILE_LOGGER=1
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 EXPOSE $PORT
 

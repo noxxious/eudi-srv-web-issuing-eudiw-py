@@ -23,13 +23,14 @@ This manages necessary data and it's removal
 import json
 import threading
 from datetime import datetime
+from urllib.parse import urljoin
 
 from .app_config.config_service import ConfService as cfgservice
 import requests
 
 
 parRequests = {}
-transaction_codes={}
+transaction_codes = {}
 deferredRequests = {}
 oid4vp_requests = {}
 form_dynamic_data = {}
@@ -39,12 +40,16 @@ session_ids = {}
 def getSessionId_requestUri(target_request_uri):
     matching_session_id = None
     for session_id, session_data in session_ids.items():
-        
-        if "request_uri" in session_data and session_data["request_uri"] == target_request_uri:
+
+        if (
+            "request_uri" in session_data
+            and session_data["request_uri"] == target_request_uri
+        ):
             matching_session_id = session_id
             break
-    
+
     return matching_session_id
+
 
 def getSessionId_authCode(target_authCode):
     matching_session_id = None
@@ -52,17 +57,22 @@ def getSessionId_authCode(target_authCode):
         if "auth_code" in session_data and session_data["auth_code"] == target_authCode:
             matching_session_id = session_id
             break
-    
+
     return matching_session_id
+
 
 def getSessionId_accessToken(target_accessToken):
     matching_session_id = None
     for session_id, session_data in session_ids.items():
-        if "access_token" in session_data and session_data["access_token"] == target_accessToken:
+        if (
+            "access_token" in session_data
+            and session_data["access_token"] == target_accessToken
+        ):
             matching_session_id = session_id
             break
-    
+
     return matching_session_id
+
 
 ################################################
 ## To be moved to a file with scheduled jobs
@@ -73,8 +83,8 @@ scheduler_call = 30  # scheduled periodic job will be called every scheduler_cal
 def clear_par():
     """Function to clear parRequests"""
     now = int(datetime.timestamp(datetime.now()))
-    #print("Job scheduled: clear_par() at " + str(now))
-    #print("Job scheduled: clear_par() at " + str(now))
+    # print("Job scheduled: clear_par() at " + str(now))
+    # print("Job scheduled: clear_par() at " + str(now))
 
     for uri in parRequests.copy():
         expire_time = parRequests[uri]["expires"]
@@ -99,34 +109,41 @@ def clear_par():
             ) """
 
     for req in deferredRequests.copy():
-            
-            if datetime.now() > deferredRequests[req]["expires"]:
-                deferredRequests.pop(req)
-            else:
-                request_data = json.loads(deferredRequests[req]["data"])
-                request_data.update({"transaction_id": req})
-                request_data = json.dumps(request_data)
-                request_headers = deferredRequests[req]["headers"]
 
-                response = requests.post(cfgservice.service_url+"credential", data=request_data, headers=request_headers)
-                response_data = response.json()
+        if datetime.now() > deferredRequests[req]["expires"]:
+            deferredRequests.pop(req)
+        else:
+            request_data = json.loads(deferredRequests[req]["data"])
+            request_data.update({"transaction_id": req})
+            request_data = json.dumps(request_data)
+            request_headers = deferredRequests[req]["headers"]
 
-                if response.status_code == 200:
-                    if "credential" in response_data or "credential_responses" in response_data:
-                        deferredRequests.pop(req)
-    
+            response = requests.post(
+                urljoin(cfgservice.service_url, "credential"),
+                data=request_data,
+                headers=request_headers,
+            )
+            response_data = response.json()
+
+            if response.status_code == 200:
+                if (
+                    "credential" in response_data
+                    or "credential_responses" in response_data
+                ):
+                    deferredRequests.pop(req)
+
     for code in transaction_codes.copy():
         if datetime.now() > transaction_codes[code]["expires"]:
-            #cfgservice.logger_info.info("Current transaction_codes:\n" + str(transaction_codes))
+            # cfgservice.logger_info.info("Current transaction_codes:\n" + str(transaction_codes))
             cfgservice.app_logger.info("Removing tx_code for code: " + str(code))
             transaction_codes.pop(code)
-    
+
     for id in oid4vp_requests.copy():
         if datetime.now() > oid4vp_requests[id]["expires"]:
-            #cfgservice.logger_info.info("Current oid4vp_requests:\n" + str(oid4vp_requests))
+            # cfgservice.logger_info.info("Current oid4vp_requests:\n" + str(oid4vp_requests))
             cfgservice.app_logger.info("Removing oid4vp_requests with id: " + str(id))
             oid4vp_requests.pop(id)
-    
+
     for id in session_ids.copy():
         if datetime.now() > session_ids[id]["expires"]:
             cfgservice.app_logger.info("Removing session id: " + str(id))
@@ -137,8 +154,9 @@ def clear_par():
             cfgservice.app_logger.info("Removing form id: " + str(id))
             form_dynamic_data.pop(id)
 
+
 def run_scheduler():
-    #print("Run scheduler.")
+    # print("Run scheduler.")
     threading.Timer(scheduler_call, run_scheduler).start()
     clear_par()
 

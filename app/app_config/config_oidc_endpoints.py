@@ -16,6 +16,7 @@
 #
 ###############################################################################
 
+from urllib.parse import urljoin
 from .config_service import ConfService as cfgserv
 
 
@@ -23,11 +24,11 @@ class ConfService:
     # Country Selection URLs
 
     country_redirect = {
-        "dynamic": cfgserv.service_url + "auth_choice",
+        "dynamic": urljoin(cfgserv.service_url, "auth_choice"),
     }
 
     # Credential URLs
 
     credential_urls = {
-        "dynamic": cfgserv.service_url + "dynamic/dynamic_R2",
+        "dynamic": urljoin(cfgserv.service_url, "dynamic/dynamic_R2"),
     }

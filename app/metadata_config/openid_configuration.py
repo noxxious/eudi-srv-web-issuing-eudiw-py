@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from ..app_config.config_service import ConfService
 
 
@@ -15,7 +17,7 @@ def build_openid_configuration(confsvc: ConfService):
             "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "refresh_token",
         ],
-        "jwks_uri": confsvc.service_url + "/static/jwks.json",
+        "jwks_uri": urljoin(confsvc.service_url, "/static/jwks.json"),
         "scopes_supported": ["openid"],
         "response_types_supported": ["code"],
         "response_modes_supported": ["query", "fragment", "form_post"],
@@ -68,13 +70,14 @@ def build_openid_configuration(confsvc: ConfService):
         "backchannel_logout_session_required": True,
         "code_challenge_methods_supported": ["S256"],
         "issuer": confsvc.service_url,
-        "registration_endpoint": confsvc.service_url + "/registration",
-        "introspection_endpoint": confsvc.service_url + "/introspection",
-        "authorization_endpoint": confsvc.service_url + "/authorizationV3",
-        "token_endpoint": confsvc.service_url + "/token",
-        "userinfo_endpoint": confsvc.service_url + "/userinfo",
-        "end_session_endpoint": confsvc.service_url + "/session",
-        "pushed_authorization_request_endpoint": confsvc.service_url
-        + "/pushed_authorizationv2",
-        "credential_endpoint": confsvc.service_url + "/credential",
+        "registration_endpoint": urljoin(confsvc.service_url, "/registration"),
+        "introspection_endpoint": urljoin(confsvc.service_url, "/introspection"),
+        "authorization_endpoint": urljoin(confsvc.service_url, "/authorizationV3"),
+        "token_endpoint": urljoin(confsvc.service_url, "/token"),
+        "userinfo_endpoint": urljoin(confsvc.service_url, "/userinfo"),
+        "end_session_endpoint": urljoin(confsvc.service_url, "/session"),
+        "pushed_authorization_request_endpoint": urljoin(
+            confsvc.service_url, "/pushed_authorizationv2"
+        ),
+        "credential_endpoint": urljoin(confsvc.service_url, "/credential"),
     }

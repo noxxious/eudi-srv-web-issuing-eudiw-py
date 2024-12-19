@@ -323,13 +323,13 @@ def authorizationv2(
 
     # return service_endpoint(current_app.server.get_endpoint("authorization"))
     url = (
-        cfgservice.service_url
-        + "authorization?redirect_uri="
+        urllib.parse.urljoin(cfgservice.service_url, 
+        "authorization?redirect_uri="
         + redirect_uri
         + "&response_type="
         + response_type
         + "&client_id="
-        + client_id
+        + client_id)
     )
 
     if scope:
@@ -459,8 +459,8 @@ def authorizationV3():
         par_args["scope"] = "openid"
 
     url = (
-        cfgservice.service_url
-        + "authorization?redirect_uri="
+        urllib.parse.urljoin(cfgservice.service_url,
+        "authorization?redirect_uri="
         + par_args["redirect_uri"]
         + "&response_type="
         + par_args["response_type"]
@@ -469,7 +469,7 @@ def authorizationV3():
         + "&client_id="
         + par_args["client_id"]
         + "&request_uri="
-        + request_uri
+        + request_uri)
     )
 
     payload = {}
@@ -683,7 +683,7 @@ def token():
             response = make_response(jsonify(error_message), 400)
             return response
 
-        url = cfgservice.service_url + "token_service"
+        url = urllib.parse.urljoin(cfgservice.service_url, "token_service")
         redirect_url = "preauth"
 
         payload = (
@@ -1161,7 +1161,7 @@ def credentialOffer():
                     out.getvalue()
                 ).decode("utf-8")
 
-                wallet_url = cfgservice.wallet_test_url + "credential_offer"
+                wallet_url = urllib.parse.urljoin(cfgservice.wallet_test_url, "credential_offer")
 
                 return render_template(
                     "openid/credential_offer_qr_code.html",
@@ -1173,7 +1173,7 @@ def credentialOffer():
                 )
 
     else:
-        return redirect(cfgservice.service_url + "credential_offer_choice")
+        return redirect(urllib.parse.urljoin(cfgservice.service_url, "credential_offer_choice"))
 
 
 """ @oidc.route("/testgetauth", methods=["GET"])
