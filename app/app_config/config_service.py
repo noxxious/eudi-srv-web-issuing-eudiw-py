@@ -35,7 +35,8 @@ class ConfService:
     # PID issuer service URL
     port = os.getenv("PORT", 5000)
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL","https://192.168.25.67:5000/")
+    # service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
     #service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
@@ -101,10 +102,10 @@ class ConfService:
     mdl_doctype = "org.iso.18013.5.1.mDL"
 
     # mDL validity in days
-    mdl_validity = 7
+    mdl_validity = 30
 
     # MDL issuing Authority
-    mdl_issuing_authority = "Test MDL issuer"
+    mdl_issuing_authority = "Regitra"
 
     # QEAA namespace
     qeaa_namespace = "eu.europa.ec.eudiw.qeaa.1"
