@@ -22,7 +22,6 @@ Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT for
 This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flask directory should be treated as a package.
 """
 
-import json
 import os
 import sys
 
@@ -43,7 +42,9 @@ from pycose.keys import EC2Key
 from cryptography.hazmat.backends import default_backend
 from cryptography import x509
 from app_config.config_service import ConfService as cfgserv
+from app_config.oid_config import build_oid_config
 
+from .metadata_config import build_metadata
 
 # Log
 from .app_config.config_service import ConfService as log
@@ -58,40 +59,7 @@ def setup_metadata():
     global oidc_metadata
     global openid_metadata
 
-    try:
-        credentials_supported = {}
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-
-        with open(
-            dir_path + "/metadata_config/openid-configuration.json"
-        ) as openid_metadata:
-            openid_metadata = json.load(openid_metadata)
-
-        with open(dir_path + "/metadata_config/metadata_config.json") as metadata:
-            oidc_metadata = json.load(metadata)
-
-        for file in os.listdir(dir_path + "/metadata_config/credentials_supported/"):
-            if file.endswith("json"):
-                json_path = os.path.join(
-                    dir_path + "/metadata_config/credentials_supported/", file
-                )
-                with open(json_path, encoding="utf-8") as json_file:
-                    credential = json.load(json_file)
-                    credentials_supported.update(credential)
-
-    except FileNotFoundError as e:
-        cfgserv.app_logger.exception(f"Metadata Error: file not found. \n{e}")
-    except json.JSONDecodeError as e:
-        cfgserv.app_logger.exception(
-            f"Metadata Error: Metadata Unable to decode JSON. \n{e}"
-        )
-    except Exception as e:
-        cfgserv.app_logger.exception(
-            f"Metadata Error: An unexpected error occurred. \n{e}"
-        )
-
-    oidc_metadata["credential_configurations_supported"] = credentials_supported
-
+    oidc_metadata, openid_metadata = build_metadata(cfgserv)
 
 setup_metadata()
 
@@ -153,10 +121,6 @@ def setup_trusted_CAs():
 
     except FileNotFoundError as e:
         cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
-    except json.JSONDecodeError as e:
-        cfgserv.app_logger.exception(
-            f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}"
-        )
     except Exception as e:
         cfgserv.app_logger.exception(
             f"TrustedCA Error: An unexpected error occurred.\n {e}"
@@ -190,7 +154,7 @@ def page_not_found(e):
         render_template(
             "misc/500.html",
             error_code="Page not found",
-            error="Page not found.We're sorry, we couldn't find the page you requested.",
+            error="Page not found. We're sorry, we couldn't find the page you requested.",
         ),
         404,
     )
@@ -264,12 +228,11 @@ def create_app(test_config=None):
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    config = create_from_config_file(
-        Configuration,
+    config = Configuration(
+        build_oid_config(cfgserv),
         entity_conf=[
             {"class": OPConfiguration, "attr": "op", "path": ["op", "server_info"]}
         ],
-        filename=dir_path + "/app_config/oid_config.py",
         base_path=dir_path,
     )
 
