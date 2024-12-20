@@ -1133,7 +1133,7 @@ def pid_test_case_form():
     pid_data["PID"].update(
         {
             "issuing_country": session["country"],
-            "issuing_authority": cfgserv.mdl_issuing_authority,
+            "issuing_authority": cfgserv.pid_issuing_authority,
         }
     )
 
