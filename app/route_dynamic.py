@@ -1111,6 +1111,7 @@ def pid_test_case_form():
                 "family_name": "Pavarde",
                 "given_name": "Vardas",
                 "birth_date": "2008-07-10"
+              }
             }
             """
         case _:
@@ -1120,6 +1121,7 @@ def pid_test_case_form():
                 "family_name": "Simpsoniene",
                 "given_name": "Marge",
                 "birth_date": "1966-03-18"
+              }
             }
             """
 
