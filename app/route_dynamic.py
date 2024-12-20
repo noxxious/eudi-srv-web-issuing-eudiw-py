@@ -210,10 +210,24 @@ def dynamic_R1(country):
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
 
         return render_template(
-            "dynamic/test-case-form.html",
+            "dynamic/mdl-test-case-form.html",
             mandatory_attributes=attributesForm,
             optional_attributes=attributesForm2,
-            redirect_url=cfgserv.service_url + "dynamic/test_case_form",
+            redirect_url=cfgserv.service_url + "dynamic/mdl_test_case_form",
+        )
+
+    if country == "LT-PID":
+        attributesForm = getAttributesForm(session["credentials_requested"])
+        if "user_pseudonym" in attributesForm:
+            attributesForm.update({"user_pseudonym": str(uuid4())})
+
+        attributesForm2 = getAttributesForm2(session["credentials_requested"])
+
+        return render_template(
+            "dynamic/pid-test-case-form.html",
+            mandatory_attributes=attributesForm,
+            optional_attributes=attributesForm2,
+            redirect_url=cfgserv.service_url + "dynamic/pid_test_case_form",
         )
 
     elif country == "sample":
@@ -620,6 +634,17 @@ def dynamic_R2_data_collect(country, user_id):
 
         return data
 
+    if country == "LT-PID":
+        data = form_dynamic_data.get(user_id, "Data not found")
+
+        if data == "Data not found":
+            return {"error": "error", "error_description": "Data not found"}
+
+        session["version"] = cfgserv.current_version
+        session["country"] = data["issuing_country"]
+
+        return data
+
     if country == "sample":
         data = form_dynamic_data.get(user_id, "Data not found")
 
@@ -764,6 +789,9 @@ def credentialCreation(credential_request, data, country):
             form_data = data
 
         elif country == "LT":
+            form_data = data
+
+        elif country == "LT-PID":
             form_data = data
 
         elif country == "sample":
@@ -1050,12 +1078,93 @@ def Dynamic_form():
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet" ))
 
 
-@dynamic.route("/test_case_form", methods=["GET", "POST"])
-def test_case_form():
+@dynamic.route("/pid_test_case_form", methods=["GET", "POST"])
+def pid_test_case_form():
     """Form page for test cases.
     Form page where the user can select mDL test case.
     """
-    session["route"] = "/dynamic/test_case_form"
+    session["route"] = "/dynamic/pid_test_case_form"
+    session["version"] = "0.5"
+    session["country"] = "LT"
+    # if GET
+    if request.method == "GET":
+        # print("/pid/form GET: " + str(request.args))
+        if (
+                session.get("country") is None or session.get("returnURL") is None
+        ):  # someone is trying to connect directly to this endpoint
+            return (
+                "Error 101: " + cfgserv.error_list["101"] + "\n",
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+    if "Cancelled" in request.form.keys():  # Form request Cancelled
+        return render_template('misc/auth_method.html')
+
+    form_data = request.form.to_dict()
+
+    test_case = form_data.get("case", "1")
+
+    match test_case:
+        case "1":
+            test_json = """
+            {
+              "PID": {
+                "family_name": "Pavarde",
+                "given_name": "Vardas",
+                "birth_date": "2008-07-10"
+              }
+            }
+            """
+        case _:
+            test_json = """
+            {
+              "PID": {
+                "family_name": "Simpsoniene",
+                "given_name": "Marge",
+                "birth_date": "1966-03-18"
+              }
+            }
+            """
+
+    user_id = generate_unique_id()
+
+    pid_data = json.loads(test_json)
+
+    pid_data["PID"].update(
+        {
+            "issuing_country": session["country"],
+            "issuing_authority": cfgserv.mdl_issuing_authority,
+        }
+    )
+
+    form_dynamic_data[user_id] = pid_data["PID"].copy()
+    form_dynamic_data[user_id].update({"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
+
+    if "jws_token" not in session or "authorization_params" in session:
+        session["jws_token"] = session["authorization_params"]["token"]
+    session["returnURL"] = cfgserv.OpenID_first_endpoint
+
+    doctype_config = cfgserv.config_doctype["eu.europa.ec.eudi.pid.1"]
+
+    today = date.today()
+    expiry = today + timedelta(days=doctype_config["validity"])
+
+    pid_data["PID"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
+    pid_data["PID"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
+    pid_data["PID"].update({"issuing_country": session["country"]}),
+    pid_data["PID"].update({"issuing_authority": doctype_config["issuing_authority"]})
+    pid_data["PID"].update({"age_over_18": True if calculate_age(pid_data["PID"]["birth_date"]) >= 18 else False})
+    pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
+
+    return render_template("dynamic/form_authorize.html", presentation_data=pid_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
+
+
+@dynamic.route("/mdl_test_case_form", methods=["GET", "POST"])
+def mdl_test_case_form():
+    """Form page for test cases.
+    Form page where the user can select mDL test case.
+    """
+    session["route"] = "/dynamic/mdl_test_case_form"
     session["version"] = "0.5"
     session["country"] = "LT"
     # if GET
