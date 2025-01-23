@@ -1183,7 +1183,12 @@ def mdl_test_case_form():
 
     form_data = request.form.to_dict()
 
-    test_case = form_data.get("case", "1")
+    test_case_number = int(form_data.get("case", "1"))
+    test_case = str(test_case_number)
+
+    # this is needed because of signature_usual_mark and usual_mark field uncertainty between ISO and POTENTIAL UC4 Test event doc
+    if test_case_number > 8:
+        test_case =  str(test_case_number - 8)
 
     match test_case:
         case "1":
@@ -1566,6 +1571,12 @@ def mdl_test_case_form():
     else:
         mdl_data["mDL"]["portrait"] = cfgserv.portrait2
 
+    # add signature field (depending on test case number either to signature_usual_mark or usual_mark field
+    if test_case_number > 8:
+        mdl_data["mDL"].update({"usual_mark": cfgserv.signature})
+    else:
+        mdl_data["mDL"].update({"signature_usual_mark": cfgserv.signature})
+
     mdl_data["mDL"].update(
         {
             "issuing_country": session["country"],
@@ -1596,7 +1607,7 @@ def mdl_test_case_form():
     mdl_data["mDL"].update({"age_over_18": True if calculate_age(mdl_data["mDL"]["birth_date"]) >= 18 else False})
     mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
 
-    # TODO check if needed
+    # convert portrait from url safe base64 to regular base64
     mdl_data["mDL"].update({"portrait": base64.b64encode(base64.urlsafe_b64decode(mdl_data["mDL"]["portrait"])).decode("utf-8")})
 
     return render_template("dynamic/form_authorize.html", presentation_data=mdl_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")

@@ -10,24 +10,108 @@
     <div class="container">
         <h1>Enter the data for your EUDI Wallet</h1>
         <form method="post" action="{{redirect_url}}" accept-charset="UTF-8" enctype="multipart/form-data" autocapitalize="off" spellcheck="false">
-            <h3>Please select a number (1-8) for the case:</h3>
+            <h3>Please select test case:</h3>
 
-            <!-- Dropdown for numbers 1-8 -->
-            <div class="row g-3">
-                <div class="col-md-12">
-                    <label for="caseSelect">Case Number:</label>
-                    <select class="form-control" name="case" id="caseSelect" required>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                    </select>
-                </div>
-            </div>
+            <ul>
+                <li>
+                    <input type="checkbox" id="checkbox1" value="1">
+                    <label for="checkbox1">- Valid DL with AM categories</label>
+                    <label for="checkbox1">- underage</label>
+                    <label for="checkbox1">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox2" value="2">
+                    <label for="checkbox2">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox2">- no restrictions</label>
+                    <label for="checkbox2">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox3" value="3">
+                    <label for="checkbox3">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox3">- general restriction (1)</label>
+                    <label for="checkbox3">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox4" value="4">
+                    <label for="checkbox4">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox4">- general restriction (3)</label>
+                    <label for="checkbox4">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox5" value="5">
+                    <label for="checkbox5">- Valid DL with A(79.03), B1, B, AM categories</label>
+                    <label for="checkbox5">- A categorie restriction 79.03</label>
+                    <label for="checkbox5">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox6" value="6">
+                    <label for="checkbox6">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox6">- restriction 78</label>
+                    <label for="checkbox6">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox7" value="7">
+                    <label for="checkbox7">- Valid DL with group 1 and group 2 categories</label>
+                    <label for="checkbox7">- valid  C categories with valid code 95</label>
+                    <label for="checkbox7">- invalid D categories</label>
+                    <label for="checkbox7">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox8" value="8">
+                    <label for="checkbox8">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox8">- two codes per category</label>
+                    <label for="checkbox8">- signature usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox9" value="9">
+                    <label for="checkbox9">- Valid DL with AM categories</label>
+                    <label for="checkbox9">- underage</label>
+                    <label for="checkbox9">- usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox10" value="10">
+                    <label for="checkbox10">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox10">- no restrictions</label>
+                    <label for="checkbox10">- usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox11" value="11">
+                    <label for="checkbox11">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox11">- general restriction (1)</label>
+                    <label for="checkbox11">- usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox12" value="12">
+                    <label for="checkbox12">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox12">- general restriction (3)</label>
+                    <label for="checkbox12">- usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox13" value="13">
+                    <label for="checkbox13">- Valid DL with A(79.03), B1, B, AM categories</label>
+                    <label for="checkbox13">- A categerie restriction 79.03</label>
+                    <label for="checkbox13">- usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox14" value="14">
+                    <label for="checkbox14">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox14">- restriction 78</label>
+                    <label for="checkbox14">- usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox15" value="15">
+                    <label for="checkbox15">- Valid DL with group 1 and group 2 categories</label>
+                    <label for="checkbox15">- valid  C categories with valid code 95</label>
+                    <label for="checkbox15">- invalid D categories</label>
+                    <label for="checkbox15">- usual mark</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="checkbox16" value="16">
+                    <label for="checkbox16">- Valid DL with B1, B, AM categories</label>
+                    <label for="checkbox16">- two codes per category</label>
+                    <label for="checkbox16">- usual mark</label>
+                </li>
+            </ul>
 
             <!-- Submit button -->
             <div class="row g-3">
@@ -39,12 +123,12 @@
     </div>
 
     <script>
-        // Ensure form submission sends the selected value of the dropdown
-        document.getElementById('eudiForm').addEventListener('submit', function(event) {
-            var caseValue = document.getElementById('caseSelect').value;
-            console.log('Selected case number:', caseValue);
-            // Optionally, you can handle the form submission here if you want to use AJAX.
-        });
+<!--        // Ensure form submission sends the selected value of the dropdown-->
+<!--        document.getElementById('eudiForm').addEventListener('submit', function(event) {-->
+<!--            var caseValue = document.getElementById('caseSelect').value;-->
+<!--            console.log('Selected case number:', caseValue);-->
+<!--            // Optionally, you can handle the form submission here if you want to use AJAX.-->
+<!--        });-->
     </script>
 </body>
 </html>
