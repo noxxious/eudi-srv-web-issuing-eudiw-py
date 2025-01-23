@@ -25,13 +25,19 @@ import base64
 from datetime import date, timedelta, datetime
 import io
 import json
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from uuid import uuid4
 from flask import Blueprint, Flask, jsonify, render_template, request, session
 from flask_cors import CORS
 import requests
 import segno
-from misc import generate_unique_id, authentication_error_redirect, getAttributesForm, getAttributesForm2, scope2details
+from misc import (
+    generate_unique_id,
+    authentication_error_redirect,
+    getAttributesForm,
+    getAttributesForm2,
+    scope2details,
+)
 from formatter_func import cbor2elems
 
 from app.validate_vp_token import validate_vp_token
@@ -44,13 +50,18 @@ CORS(oid4vp)  # enable CORS on the blue print
 from app.data_management import oid4vp_requests, form_dynamic_data
 
 
-
 @oid4vp.route("/oid4vp", methods=["GET"])
 def openid4vp():
 
     if "session_id" in session:
-        cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + "oid4vp")
-    
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session["session_id"]
+            + ", "
+            + "Authorization selection, Type: "
+            + "oid4vp"
+        )
+
     authorization_params = session["authorization_params"]
     authorization_details = []
 
@@ -67,8 +78,7 @@ def openid4vp():
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
 
-
-    session["oid4vp_cred_requested"] = credentials_requested 
+    session["oid4vp_cred_requested"] = credentials_requested
 
     input_descriptors = []
 
@@ -79,30 +89,19 @@ def openid4vp():
                 {
                     "id": doctype,
                     "format": {
-                    "mso_mdoc": {
-                        "alg": [
-                        "ES256",
-                        "ES384",
-                        "ES512",
-                        "EdDSA"
-                        ]
-                    }
+                        "mso_mdoc": {"alg": ["ES256", "ES384", "ES512", "EdDSA"]}
                     },
                     "name": "EUDI PID",
                     "purpose": "We need to verify your identity",
-                    "constraints": {
-                    "fields": fields
-                    }
+                    "constraints": {"fields": fields},
                 }
             )
             for namespace in cfgservice.dynamic_issuing[id][doctype]:
                 for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
                     fields.append(
                         {
-                        "path": [
-                            "$['" + namespace + "']['"+ attribute +"']"
-                        ],
-                        "intent_to_retain": False
+                            "path": ["$['" + namespace + "']['" + attribute + "']"],
+                            "intent_to_retain": False,
                         }
                     )
 
@@ -113,8 +112,8 @@ def openid4vp():
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
             "presentation_definition": {
                 "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": input_descriptors
-            }
+                "input_descriptors": input_descriptors,
+            },
         }
     )
 
@@ -124,9 +123,13 @@ def openid4vp():
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
             "presentation_definition": {
                 "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": input_descriptors
+                "input_descriptors": input_descriptors,
             },
-            "wallet_response_redirect_uri_template":cfgservice.service_url + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id=" + session["session_id"]
+            "wallet_response_redirect_uri_template": urljoin(
+                cfgservice.service_url,
+                "getpidoid4vp?response_code={RESPONSE_CODE}&session_id="
+                + session["session_id"],
+            ),
         }
     )
 
@@ -134,23 +137,39 @@ def openid4vp():
         "Content-Type": "application/json",
     }
 
-    response_cross = requests.request("POST", url[:-1], headers=headers, data=payload_cross_device).json()
+    response_cross = requests.request(
+        "POST", url[:-1], headers=headers, data=payload_cross_device
+    ).json()
 
-    response_same = requests.request("POST", url[:-1], headers=headers, data=payload_same_device).json()
-    
-    oid4vp_requests.update({session["session_id"]:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
+    response_same = requests.request(
+        "POST", url[:-1], headers=headers, data=payload_same_device
+    ).json()
+
+    oid4vp_requests.update(
+        {
+            session["session_id"]: {
+                "response": response_same,
+                "expires": datetime.now()
+                + timedelta(minutes=cfgservice.deffered_expiry),
+            }
+        }
+    )
 
     domain = urlparse(url).netloc
 
     deeplink_url = (
-        "eudi-openid4vp://" + domain + "?client_id="
+        "eudi-openid4vp://"
+        + domain
+        + "?client_id="
         + response_same["client_id"]
         + "&request_uri="
         + response_same["request_uri"]
     )
 
     qr_code_url = (
-        "eudi-openid4vp://" + domain + "?client_id="
+        "eudi-openid4vp://"
+        + domain
+        + "?client_id="
         + response_cross["client_id"]
         + "&request_uri="
         + response_cross["request_uri"]
@@ -162,7 +181,7 @@ def openid4vp():
 
     qrcode = segno.make(qr_code_url)
     out = io.BytesIO()
-    qrcode.save(out, kind='png', scale=3)
+    qrcode.save(out, kind="png", scale=3)
 
     """ qrcode.to_artistic(
         background=cfgtest.qr_png,
@@ -182,7 +201,7 @@ def openid4vp():
         url_data=deeplink_url,
         qrcode=qr_img_base64,
         presentation_id=response_cross["presentation_id"],
-        redirect_url= cfgservice.service_url
+        redirect_url=cfgservice.service_url,
     )
 
 
@@ -190,19 +209,29 @@ def openid4vp():
 def getpidoid4vp():
 
     if "response_code" in request.args and "session_id" in request.args:
-        cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
+        cfgservice.app_logger.info(
+            ", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device"
+        )
 
         response_code = request.args.get("response_code")
-        presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
+        presentation_id = oid4vp_requests[request.args.get("session_id")]["response"][
+            "presentation_id"
+        ]
         url = (
             cfgservice.dynamic_presentation_url
             + presentation_id
             + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
-            + "&response_code=" + response_code
+            + "&response_code="
+            + response_code
         )
 
     elif "presentation_id" in request.args:
-        cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: cross_device")
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session["session_id"]
+            + ", "
+            + "oid4vp flow: cross_device"
+        )
         presentation_id = request.args.get("presentation_id")
 
         url = (
@@ -220,11 +249,18 @@ def getpidoid4vp():
         error_msg = str(response.status_code)
         return jsonify({"error": error_msg}), 400
 
-
-    error, error_msg = validate_vp_token(response.json(), session["oid4vp_cred_requested"])
+    error, error_msg = validate_vp_token(
+        response.json(), session["oid4vp_cred_requested"]
+    )
 
     if error == True:
-        cfgservice.app_logger.error(", Session ID: " + session["session_id"] + ", " + "OID4VP error: " + error_msg)
+        cfgservice.app_logger.error(
+            ", Session ID: "
+            + session["session_id"]
+            + ", "
+            + "OID4VP error: "
+            + error_msg
+        )
         return authentication_error_redirect(
             jws_token=session["authorization_params"]["token"],
             error="invalid_request",
@@ -274,37 +310,45 @@ def getpidoid4vp():
             for attribute, value in mdoc_json[doctype]:
                 if attribute == "age_over_18":
                     attributesForm.update({attribute: value})
-        
-        doctype_config = cfgservice.config_doctype["eu.europa.ec.eudi.pseudonym.age_over_18.1"]
+
+        doctype_config = cfgservice.config_doctype[
+            "eu.europa.ec.eudi.pseudonym.age_over_18.1"
+        ]
 
         attributesForm.update({"issuing_country": "FC"})
-        attributesForm.update({"issuing_authority": doctype_config["issuing_authority"]})
+        attributesForm.update(
+            {"issuing_authority": doctype_config["issuing_authority"]}
+        )
         if "credential_type" in doctype_config:
-            attributesForm.update({"credential_type":doctype_config["credential_type"] })
+            attributesForm.update(
+                {"credential_type": doctype_config["credential_type"]}
+            )
 
         user_id = generate_unique_id()
         form_dynamic_data[user_id] = attributesForm.copy()
 
-        form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)})
-        
+        form_dynamic_data[user_id].update(
+            {"expires": datetime.now() + timedelta(minutes=cfgservice.form_expiry)}
+        )
+
         presentation_data = attributesForm.copy()
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])
-        
 
-        presentation_data.update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
+        presentation_data.update(
+            {"estimated_issuance_date": today.strftime("%Y-%m-%d")}
+        )
         presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
 
         if "jws_token" not in session and "authorization_params" in session:
-                session["jws_token"] = session["authorization_params"]["token"]
-
+            session["jws_token"] = session["authorization_params"]["token"]
 
         return render_template(
             "dynamic/form_authorize_oid4vp.html",
             attributes=presentation_data,
             user_id="FC." + user_id,
-            redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
+            redirect_url=urljoin(cfgservice.service_url, "dynamic/redirect_wallet"),
         )
     else:
         authorization_params = session["authorization_params"]
@@ -342,5 +386,6 @@ def getpidoid4vp():
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,
             optional_attributes=attributesForm2,
-            redirect_url=cfgservice.service_url + "dynamic/form",
+            redirect_url=urljoin(cfgservice.service_url, "dynamic/form"),
         )
+

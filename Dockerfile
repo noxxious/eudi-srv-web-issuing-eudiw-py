@@ -1,36 +1,62 @@
-FROM ubuntu:22.04
+FROM python:3.12 AS build
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
-    python3.10 \
-    python3.10-venv \
-    python3.10-dev \
-    python3-pip \
-    git \
-    gcc \
-    build-essential \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /app
 
-RUN mkdir -p /tmp/log_dev
-RUN chmod -R 755 /tmp/log_dev
+COPY app/requirements.txt /requirements.txt
 
-RUN git clone https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py.git /root/eudi-srv-web-issuing-eudiw-py
+WORKDIR /
 
-WORKDIR /root/eudi-srv-web-issuing-eudiw-py
+# TODO: oscrypto not detecting OpenSSL>3 git+https://github.com/wbond/oscrypto.git
+RUN python3 -m venv venv \ 
+    && /venv/bin/pip install \
+    --no-cache-dir -r requirements.txt
+    # \
+    #-I git+https://github.com/wbond/oscrypto.git
 
-RUN python3 -m venv venv
+FROM python:3.12
 
-RUN /root/eudi-srv-web-issuing-eudiw-py/venv/bin/pip install --no-cache-dir -r app/requirements.txt
+RUN mkdir -p /tmp/log_dev \
+    && chmod -R 755 /tmp/log_dev \
+    && mkdir -p /etc/eudiw/pid-issuer/cert \
+    && mkdir -p /etc/eudiw/pid-issuer/privkey
 
-EXPOSE 5000
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /venv /venv
+COPY ./app /app
 
-ENV FLASK_APP=app\
-    FLASK_RUN_PORT=5000\
-    FLASK_RUN_HOST=0.0.0.0\
-    SERVICE_URL="https://127.0.0.1:5000/" \
-    EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"\
-    DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+WORKDIR /app
 
-CMD ["sh", "-c", "cp /root/secrets/config_secrets.py /root/eudi-srv-web-issuing-eudiw-py/app/app_config/ && export REQUESTS_CA_BUNDLE=/root/secrets/cert.pem && /root/eudi-srv-web-issuing-eudiw-py/venv/bin/flask run --cert=/root/secrets/cert.pem --key=/root/secrets/key.pem"]
+ENV PORT=5000
+ENV HOST=0.0.0.0
+ENV EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"
+ENV DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+ENV SERVICE_URL="http://127.0.0.1:${PORT}/"
+ENV FLASK_SECRET="secret"
+ENV EIDASNODE_LIGHTTOKEN_SECRET="secret"
+ENV FLASK_RUN_PORT=$PORT
+ENV FLASK_RUN_HOST=$HOST
+ENV REQUESTS_CA_BUNDLE=/app/secrets/cert.pem
+ENV USE_GCP_LOGGER=0
+ENV USE_FILE_LOGGER=1
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
+EXPOSE $PORT
+
+VOLUME /app/secrets/cert.pem
+VOLUME /app/secrets/cert.key
+VOLUME /etc/eudiw/pid-issuer/privKey
+VOLUME /etc/eudiw/pid-issuer/cert
+VOLUME /tmp/log_dev
+
+#ENV FLASK_APP=app \
+#    FLASK_RUN_PORT=$PORT\
+#    FLASK_RUN_HOST=$HOST\
+#    SERVICE_URL="https://127.0.0.1:5000/" \
+#    EIDAS_NODE_URL="${EIDAS_NODE_URL}"
+#    DYNAMIC_PRESENTATION_URL="${DYNAMIC_PRESENTATION_URL}"
+
+#ENTRYPOINT [ "/venv/bin/flask" ]
+#CMD ["run", "--cert=/app/secrets/cert.pem", "--key=/app/secrets/key.pem"]
+CMD ["/venv/bin/flask", "--app", ".", "run"]

@@ -17,10 +17,16 @@
 ###############################################################################
 import datetime
 import json
+from urllib.parse import urljoin
 from flask import session
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
-from misc import calculate_age, getIssuerFilledAttributes, getMandatoryAttributes, getOptionalAttributes
+from misc import (
+    calculate_age,
+    getIssuerFilledAttributes,
+    getMandatoryAttributes,
+    getOptionalAttributes,
+)
 from redirect_func import json_post
 import base64
 from flask import session
@@ -42,10 +48,10 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
     data = formatter(dict(form_data), un_distinguishing_sign, doctype, format)
 
     if format == "mso_mdoc":
-        url = cfgserv.service_url + "formatter/cbor"
+        url = urljoin(cfgserv.service_url, "formatter/cbor")
 
     elif format == "vc+sd-jwt":
-        url = cfgserv.service_url + "formatter/sd-jwt"
+        url = urljoin(cfgserv.service_url, "formatter/sd-jwt")
 
     r = json_post(
         url,
@@ -95,7 +101,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                         credentialsSupported[request]["claims"][namescape]
                     )
 
-                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])                    
+                    issuer_claims = getIssuerFilledAttributes(
+                        credentialsSupported[request]["claims"][namescape]
+                    )
 
                     pdata = {namescape: {}}
 
@@ -125,7 +133,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                         credentialsSupported[request]["claims"][namescape]
                     )
 
-                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])
+                    issuer_claims = getIssuerFilledAttributes(
+                        credentialsSupported[request]["claims"][namescape]
+                    )
 
                     pdata["claims"] = {namescape: {}}
 
@@ -141,14 +151,14 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                         )
                     }
                 )
-            
+
             if "un_distinguishing_sign" in issuer_claims:
                 data.update({"un_distinguishing_sign": un_distinguishing_sign})
 
             if "issuance_date" in issuer_claims:
                 data.update({"issuance_date": today.strftime("%Y-%m-%d")})
 
-            if "issue_date" in issuer_claims: 
+            if "issue_date" in issuer_claims:
                 data.update({"issue_date": today.strftime("%Y-%m-%d")})
             if "expiry_date" in issuer_claims:
                 data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
@@ -156,9 +166,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 data.update({"issuing_authority": doctype_config["issuing_authority"]})
 
             if "credential_type" in issuer_claims:
-                data.update({"credential_type":doctype_config["credential_type"] })
-                attributes_req.update({"credential_type":""})
-            
+                data.update({"credential_type": doctype_config["credential_type"]})
+                attributes_req.update({"credential_type": ""})
+
             """ attributes_req.update({
                 "expiry_date":"",
                 "issuing_authority":"",
@@ -176,7 +186,8 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 }) """
 
             
-            if "driving_privileges" in attributes_req:
+            if ("driving_privileges" in attributes_req) and data["issuing_country"] != "LT":
+                print("dynamic_func_data: " + str(data))
                 json_priv = json.loads(data["driving_privileges"])
                 data.update({"driving_privileges": json_priv})
 
@@ -191,7 +202,6 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 for attribute in issuer_claims:
                     if attribute in data:
                         pdata[namescape].update({attribute: data[attribute]})
-                
 
             elif format == "vc+sd-jwt":
                 for attribute in attributes_req:
@@ -204,6 +214,5 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 for attribute in issuer_claims:
                     if attribute in data:
                         pdata["claims"][namescape].update({attribute: data[attribute]})
-
 
             return pdata

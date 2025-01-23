@@ -25,6 +25,7 @@ This route_eidasnode.py file is the blueprint for the route /eidasnode of the PI
 import base64
 import json
 import logging
+from urllib.parse import urljoin
 
 from flask import (
     Blueprint,
@@ -48,7 +49,6 @@ from pid_func import format_pid_data, format_sd_jwt_pid_data
 # /eidasnode blueprint
 eidasnode = Blueprint("eidasnode", __name__, url_prefix="/eidasnode")
 CORS(eidasnode)  # enable CORS on the eidasnode blue print
-
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ def eidasnodeR2():
     session["version"] = "0.4"
     session["device_publickey"] = request.args["device_publickey"]
     user_id = request.args["user_id"]
-    session["returnURL"] = cfgservice.service_url + "V04/getpid"
+    session["returnURL"] = urljoin(cfgservice.service_url, "V04/getpid")
 
     session["route"] = "/eidasnode/eidasR2"
     cfgservice.app_logger.info(
@@ -207,7 +207,7 @@ def eidasnodeR2():
     pdata1 = format_sd_jwt_pid_data(e, session["country"])
 
     r = json_post(
-        cfgservice.service_url + "formatter/cbor",
+        urljoin(cfgservice.service_url, "formatter/cbor"),
         {
             "version": session["version"],
             "country": session["country"],
@@ -222,7 +222,7 @@ def eidasnodeR2():
         )
 
     r1 = json_post(
-        cfgservice.service_url + "formatter/sd-jwt",
+        urljoin(cfgservice.service_url, "formatter/sd-jwt"),
         {
             "version": session["version"],
             "country": session["country"],
@@ -262,7 +262,7 @@ def dynamic_eidasnodeR2():
     credential_request = credential_request_json["credential_requests"]
     user_id = credential_request_json["user_id"]
 
-    session["returnURL"] = cfgservice.service_url + "V04/getpid"
+    session["returnURL"] = urljoin(cfgservice.service_url, "V04/getpid")
 
     session["route"] = "/eidasnode/eidasR2"
     cfgservice.app_logger.info(

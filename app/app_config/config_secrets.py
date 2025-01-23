@@ -19,10 +19,11 @@
 """
 Configuration of service secrets
 """
+import os
 
-flask_secret_key = "secret_here"
+flask_secret_key = os.getenv("FLASK_SECRET", "secret_here")
 
 # eIDAS secret connector request
 # Defined in eIDAS node service file specificConnector/specificCommunicationDefinitionConnector.xml,
 #                                   entry key="lightToken.connector.request.secret"
-eidasnode_lightToken_secret = "secret_here"
+eidasnode_lightToken_secret = os.getenv("EIDASNODE_LIGHTTOKEN_SECRET", "secret_here")

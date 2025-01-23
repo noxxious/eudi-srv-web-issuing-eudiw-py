@@ -33,12 +33,14 @@ import os
 class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
+    port = os.getenv("PORT", 5000)
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL","https://192.168.0.172:5000/")
+    # service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
     #service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
-    wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
+    wallet_test_url = os.getenv("WALLET_TEST_URL", "https://dev.tester.issuer.eudiw.dev/")
 
     # ---------------------------------------------------------------------------
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
@@ -100,10 +102,10 @@ class ConfService:
     mdl_doctype = "org.iso.18013.5.1.mDL"
 
     # mDL validity in days
-    mdl_validity = 7
+    mdl_validity = 30
 
     # MDL issuing Authority
-    mdl_issuing_authority = "Test MDL issuer"
+    mdl_issuing_authority = "Regitra"
 
     # QEAA namespace
     qeaa_namespace = "eu.europa.ec.eudiw.qeaa.1"
@@ -443,28 +445,33 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
-    log_dir = "/tmp/log_dev"
-    # log_dir = "../../log"
-    log_file_info = "logs.log"
+    if os.getenv("USE_GCP_LOGGING") == "1":
+        from ..adapters.out.logging.google_cloud import get_logger
+        app_logger = get_logger("app_logger")
+    else:
+        app_logger = logging.getLogger("app_logger")
 
-    backup_count = 7
+    if os.getenv("LOG_TO_FILE") == "1":
+        log_dir = "/tmp/log_dev"
+        # log_dir = "../../log"
+        log_file_info = "logs.log"
 
-    try:
-        os.makedirs(log_dir)
-    except FileExistsError:
-        pass
+        backup_count = 7
 
-    log_handler_info = TimedRotatingFileHandler(
-        filename=f"{log_dir}/{log_file_info}",
-        when="midnight",  # Rotation midnight
-        interval=1,  # new file each day
-        backupCount=backup_count,
-    )
+        try:
+            os.makedirs(log_dir)
+        except FileExistsError:
+            pass
 
-    log_handler_info.setFormatter("%(asctime)s %(name)s %(levelname)s %(message)s")
+        log_handler_info = TimedRotatingFileHandler(
+            filename=f"{log_dir}/{log_file_info}",
+            when="midnight",  # Rotation midnight
+            interval=1,  # new file each day
+            backupCount=backup_count,
+        )
+        log_handler_info.setFormatter("%(asctime)s %(name)s %(levelname)s %(message)s")
+        app_logger.addHandler(log_handler_info)
 
-    app_logger = logging.getLogger("app_logger")
-    app_logger.addHandler(log_handler_info)
     app_logger.setLevel(logging.INFO)
 
     """  logger_error = logging.getLogger("error")
