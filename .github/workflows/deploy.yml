@@ -50,7 +50,8 @@ on:
   push:
     branches:
       - $default-branch
-
+  workflow_dispatch:
+  
 env:
   PROJECT_ID: ${{vars.PROJECT_ID }}
   SERVICE: ${{ vars.SERVICE }}
