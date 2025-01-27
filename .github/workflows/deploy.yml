@@ -49,7 +49,7 @@ name: Deploy to Cloud Run
 on:
   push:
     branches:
-      - $default-branch
+      - main
   workflow_dispatch:
   
 env:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Deploy to Cloud Run
         id: deploy
-        uses: google-github-actions/deploy-cloudrun@v0
+        uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
@@ -95,11 +95,11 @@ jobs:
           source: ./
           tag: latest
           flags: >-
-              '
-              --add-volume name=eudiw-lt-issuer-keys,type=cloud-storage,bucket=${{ env.ISSUER_KEYS_BUCKET }} --add-volume-mount volume=eudiw-lt-issuer-keys,mount-path=/etc/eudiw/pid-issuer/privKey 
-              --add-volume name=eudiw-lt-trusted-ca,type=cloud-storage,bucket=${{ env.TRUSTED_CA_BUCKET }} --add-volume-mount volume=eudiw-lt-trusted-ca,mount-path=/etc/eudiw/pid-issuer/cert 
+              --add-volume name=eudiw-lt-issuer-keys,type=cloud-storage,bucket=${{ env.ISSUER_KEYS_BUCKET }} 
+              --add-volume-mount volume=eudiw-lt-issuer-keys,mount-path=/etc/eudiw/pid-issuer/privKey 
+              --add-volume name=eudiw-lt-trusted-ca,type=cloud-storage,bucket=${{ env.TRUSTED_CA_BUCKET }} 
+              --add-volume-mount volume=eudiw-lt-trusted-ca,mount-path=/etc/eudiw/pid-issuer/cert  
               --port 5000
-              '
           secrets: |-
             FLASK_SECRET=${{ secrets.ISSUER_FLASK_SECRET }}
             EIDASNODE_LIGHTTOKEN_SECRET=${{ secrets.EIDAS_LIGHT_TOKEN_SECRET }}
