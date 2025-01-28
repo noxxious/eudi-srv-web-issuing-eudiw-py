@@ -95,9 +95,9 @@ jobs:
           source: ./
           tag: latest
           flags: >-
-              --add-volume name=eudiw-lt-issuer-keys,type=cloud-storage,bucket=${{ env.ISSUER_KEYS_BUCKET }} 
+              --add-volume name=eudiw-lt-issuer-keys,type=cloud-storage,bucket=${{ vars.ISSUER_KEYS_BUCKET }} 
               --add-volume-mount volume=eudiw-lt-issuer-keys,mount-path=/etc/eudiw/pid-issuer/privKey 
-              --add-volume name=eudiw-lt-trusted-ca,type=cloud-storage,bucket=${{ env.TRUSTED_CA_BUCKET }} 
+              --add-volume name=eudiw-lt-trusted-ca,type=cloud-storage,bucket=${{ vars.TRUSTED_CA_BUCKET }} 
               --add-volume-mount volume=eudiw-lt-trusted-ca,mount-path=/etc/eudiw/pid-issuer/cert  
               --port 5000
           secrets_update_strategy: overwrite
@@ -108,9 +108,9 @@ jobs:
           env_vars: |-
             USE_GCP_LOGGER=1
             USE_FILE_LOGGER=0
-            EIDAS_NODE_URL="${{ env.EIDAS_NODE_URL }}"
-            DYNAMIC_PRESENTATION_URL="${{ env.DYNAMIC_PRESENTATION_URL }}"
-            SERVICE_URL="${{ env.SERVICE_URL }}"
+            EIDAS_NODE_URL="${{ vars.EIDAS_NODE_URL }}"
+            DYNAMIC_PRESENTATION_URL="${{ vars.DYNAMIC_PRESENTATION_URL }}"
+            SERVICE_URL="${{ vars.SERVICE_URL }}"
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
