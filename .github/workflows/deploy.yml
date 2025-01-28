@@ -100,9 +100,11 @@ jobs:
               --add-volume name=eudiw-lt-trusted-ca,type=cloud-storage,bucket=${{ env.TRUSTED_CA_BUCKET }} 
               --add-volume-mount volume=eudiw-lt-trusted-ca,mount-path=/etc/eudiw/pid-issuer/cert  
               --port 5000
+          secrets_update_strategy: overwrite
           secrets: |-
             FLASK_SECRET=${{ secrets.ISSUER_FLASK_SECRET }}
             EIDASNODE_LIGHTTOKEN_SECRET=${{ secrets.EIDAS_LIGHT_TOKEN_SECRET }}
+          env_vars_update_strategy: overwrite
           env_vars: |-
             USE_GCP_LOGGER=1
             USE_FILE_LOGGER=0
