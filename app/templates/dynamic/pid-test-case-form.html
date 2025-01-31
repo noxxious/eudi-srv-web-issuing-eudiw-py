@@ -2,43 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no"/>
     <title>Form for EUDI Wallet</title>
     <style>
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
         ul li {
-            margin-bottom: 20px;
+            margin: 0px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        ul li:nth-child(odd) {
+            background-color: white;
+        }
+
+        ul li:nth-child(even) {
+            background-color: #f0f0f0;
         }
 
         ul li label {
             display: block;
             margin-bottom: 0;
+            padding-left: 10px;
+        }
+
+         .row.g-3 {
+            margin: 20px;
         }
     </style>
 </head>
 
 <div class="container">
-        <h1>Enter the data for your EUDI Wallet</h1>
-        <form method="post" action="{{redirect_url}}" accept-charset="UTF-8" enctype="multipart/form-data" autocapitalize="off" spellcheck="false">
-            <h3>Please select test case:</h3>
+    <form method="post" action="{{redirect_url}}" accept-charset="UTF-8" enctype="multipart/form-data" autocapitalize="off" spellcheck="false">
+        <h3>Please select test case:</h3>
 
-            <ul>
-                <li>
-                    <input type="radio" name="case" id="checkbox1" value="1">
+        <ul>
+            <li>
+                <input type="radio" name="case" id="checkbox1" value="1">
+                <div>
                     <label for="checkbox1">Test case 1</label>
-                </li>
-                <li>
-                    <input type="radio" name="case" id="checkbox2" value="2">
-                    <label for="checkbox2">Test case 2</label>
-                </li>
-            </ul>
-
-            <!-- Submit button -->
-            <div class="row g-3">
-                <div class="col-md-12">
-                    <input type="submit" value="Submit" class="btn btn-primary" />
                 </div>
+            </li>
+            <li>
+                <input type="radio" name="case" id="checkbox2" value="2">
+                <div>
+                    <label for="checkbox2">Test case 2</label>
+                </div>
+            </li>
+        </ul>
+
+        <!-- Submit button -->
+        <div class="row g-3">
+            <div class="col-md-12">
+                <input type="submit" value="Submit" class="btn btn-primary"/>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
 </body>
 </html>
