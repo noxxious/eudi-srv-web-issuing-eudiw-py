@@ -22,7 +22,7 @@ def add_number_to_image(image_path, number):
 
         try:
             # Attempt to load the Font Awesome font with a larger size for visibility
-            font = ImageFont.truetype(font_path, size=150)  # Increase the font size to make it visible
+            font = ImageFont.truetype(font_path, size=15)  # Increase the font size to make it visible
             logger.info(f"Successfully loaded Font Awesome font from {font_path}")
         except IOError as e:
             # Log error if font loading fails
@@ -38,7 +38,7 @@ def add_number_to_image(image_path, number):
 
         # Calculate text width and height from the bounding box
         text_width = bbox[2] - bbox[0]
-        text_height = 150
+        text_height = bbox[3] - bbox[1]
 
         # Get the size of the image
         img_width, img_height = img.size
