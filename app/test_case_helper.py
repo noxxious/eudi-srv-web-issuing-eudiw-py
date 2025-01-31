@@ -28,7 +28,7 @@ def add_number_to_image(image_path, number):
         img_width, img_height = img.size
         position = ((img_width - text_width) // 2, (img_height - text_height) // 2)
 
-        draw.text(position, text, font=font, fill=(255, 0, 0))  # Red text
+        draw.text(position, text, font=font, fill=(200, 0, 0))  # Red text
 
         # Save the modified image to a BytesIO object
         img_byte_array = BytesIO()

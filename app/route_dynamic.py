@@ -1611,9 +1611,6 @@ def mdl_test_case_form():
     mdl_data["mDL"].update({"age_over_18": True if calculate_age(mdl_data["mDL"]["birth_date"]) >= 18 else False})
     mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
 
-    # convert portrait from url safe base64 to regular base64
-    # mdl_data["mDL"].update({"portrait": base64.b64encode(base64.urlsafe_b64decode(mdl_data["mDL"]["portrait"])).decode("utf-8")})
-
     return render_template("dynamic/form_authorize.html", presentation_data=mdl_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])
