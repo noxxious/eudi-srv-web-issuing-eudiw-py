@@ -9,6 +9,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def add_number_to_image(image_path, number):
+    logger.info("ADD_NUMBER_TO_IMAGE")
+
     # Open the image file
     with Image.open(image_path) as img:
         # Convert image to RGB mode (required for JPG)
