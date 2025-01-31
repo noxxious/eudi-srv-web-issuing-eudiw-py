@@ -7,7 +7,6 @@ from io import BytesIO
 def add_number_to_image(image_path, number):
     # Configure logging
     logger = cfgserv.app_logger
-    logger.info("ADD_NUMBER_TO_IMAGE")
 
     # Open the image file
     with Image.open(image_path) as img:
@@ -18,7 +17,7 @@ def add_number_to_image(image_path, number):
         draw = ImageDraw.Draw(img)
 
         # Path to the Font Awesome font (adjusted for your case)
-        font_path = Path(__file__).parent / 'static' / 'fontawesome-free-5.15.4-web' / 'webfonts' / 'fa-solid-900.ttf'
+        font_path = Path(__file__).parent / 'static' / 'arial.ttf'
 
         try:
             # Attempt to load the Font Awesome font with a larger size for visibility
