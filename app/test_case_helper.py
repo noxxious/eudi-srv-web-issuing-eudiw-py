@@ -4,10 +4,9 @@ from PIL import Image, ImageDraw, ImageFont
 import base64
 from io import BytesIO
 
-# Configure logging
-logger = logging.getLogger(__name__)
-
 def add_number_to_image(image_path, number):
+    # Configure logging
+    logger = logging.getLogger(__name__)
     logger.info("ADD_NUMBER_TO_IMAGE")
 
     # Open the image file
