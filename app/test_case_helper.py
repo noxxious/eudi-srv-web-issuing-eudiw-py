@@ -1,30 +1,39 @@
 import logging
 from pathlib import Path
-
 from PIL import Image, ImageDraw, ImageFont
 import base64
 from io import BytesIO
 
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def add_number_to_image(image_path, number):
     # Open the image file
     with Image.open(image_path) as img:
-        img = img.convert('RGB')
+        # Convert image to RGB mode (required for JPG)
+        img = img.convert('RGB')  # Ensure it's in RGB mode for saving as JPG
 
         # Prepare to draw on the image
         draw = ImageDraw.Draw(img)
 
+        # Path to the Font Awesome font (adjusted for your case)
         font_path = Path(__file__).parent / 'static' / 'fontawesome-free-5.15.4-web' / 'webfonts' / 'fa-solid-900.ttf'
+
         try:
-            font = ImageFont.truetype(font_path, size=100)  # Adjust the size as needed
+            # Attempt to load the Font Awesome font with a larger size for visibility
+            font = ImageFont.truetype(font_path, size=150)  # Increase the font size to make it visible
+            logger.info(f"Successfully loaded Font Awesome font from {font_path}")
         except IOError as e:
+            # Log error if font loading fails
             logger.error(f"Failed to load Font Awesome font from {font_path}: {e}")
-            font = ImageFont.load_default()  # Fallback to the default font if Font Awesome fails
+            font = ImageFont.load_default()  # Fallback to default font
+            logger.info("Falling back to default font")
 
-        text = str(number)
+        # Text (can be a number or a Font Awesome icon Unicode)
+        text = str(number)  # The number to be added on the image
 
+        # Get the bounding box for the text (to center it)
         bbox = draw.textbbox((0, 0), text, font=font)
 
         # Calculate text width and height from the bounding box
@@ -34,11 +43,14 @@ def add_number_to_image(image_path, number):
         # Get the size of the image
         img_width, img_height = img.size
 
-        # Calculate position to center the text
+        # Calculate the position to center the text on the image
         position = ((img_width - text_width) // 2, (img_height - text_height) // 2)
 
-        # Draw the text directly on the image (using red color)
-        draw.text(position, text, font=font, fill=(255, 0, 0))
+        # Log text position and size for debugging
+        logger.info(f"Text position: {position}, Text size: {text_width}x{text_height}")
+
+        # Draw the text directly on the image (using red color for visibility)
+        draw.text(position, text, font=font, fill=(255, 0, 0))  # Red text for better visibility
 
         # Save the modified image to a BytesIO object (JPG format)
         img_byte_array = BytesIO()
