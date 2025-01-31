@@ -1,4 +1,4 @@
-import logging
+from app_config.config_service import ConfService as cfgserv
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import base64
@@ -6,7 +6,7 @@ from io import BytesIO
 
 def add_number_to_image(image_path, number):
     # Configure logging
-    logger = logging.getLogger()
+    logger = cfgserv.app_logger
     logger.info("ADD_NUMBER_TO_IMAGE")
     print("ADD_NUMBER_TO_IMAGE")
 
