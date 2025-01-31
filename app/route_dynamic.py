@@ -1568,6 +1568,10 @@ def mdl_test_case_form():
 
     mdl_data = json.loads(test_json)
 
+    logger = cfgserv.app_logger
+
+    logger.info("PRE_ADD_NUMBER_TO_IMAGE")
+
     if mdl_data["mDL"]["portrait"] == "M":
         mdl_data["mDL"]["portrait"] = add_number_to_image(Path(__file__).parent / 'static' / 'image.jpeg', test_case_number)
     else:
@@ -1612,7 +1616,7 @@ def mdl_test_case_form():
     mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
 
     # convert portrait from url safe base64 to regular base64
-    mdl_data["mDL"].update({"portrait": base64.b64encode(base64.urlsafe_b64decode(mdl_data["mDL"]["portrait"])).decode("utf-8")})
+    # mdl_data["mDL"].update({"portrait": base64.b64encode(base64.urlsafe_b64decode(mdl_data["mDL"]["portrait"])).decode("utf-8")})
 
     return render_template("dynamic/form_authorize.html", presentation_data=mdl_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
 
