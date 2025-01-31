@@ -42,6 +42,8 @@ import urllib.parse
 from app.lighttoken import handle_response
 from app.validate_vp_token import validate_vp_token
 from urllib.parse import urljoin
+from pathlib import Path
+from test_case_helper import *
 
 from boot_validate import (
     validate_mandatory_args,
@@ -1567,15 +1569,17 @@ def mdl_test_case_form():
     mdl_data = json.loads(test_json)
 
     if mdl_data["mDL"]["portrait"] == "M":
-        mdl_data["mDL"]["portrait"] = cfgserv.portrait1
+        mdl_data["mDL"]["portrait"] = add_number_to_image(Path(__file__).parent / 'static' / 'image.jpeg', test_case_number)
     else:
-        mdl_data["mDL"]["portrait"] = cfgserv.portrait2
+        mdl_data["mDL"]["portrait"] = add_number_to_image(Path(__file__).parent / 'static' / 'image2.jpeg', test_case_number)
 
     # add signature field (depending on test case number either to signature_usual_mark or usual_mark field
+    signature_path = Path(__file__).parent / 'static' / 'signature.jpg'
+
     if test_case_number > 8:
-        mdl_data["mDL"].update({"usual_mark": cfgserv.signature})
+        mdl_data["mDL"].update({"usual_mark": convert_image_to_base64(signature_path)})
     else:
-        mdl_data["mDL"].update({"signature_usual_mark": cfgserv.signature})
+        mdl_data["mDL"].update({"signature_usual_mark": convert_image_to_base64(signature_path)})
 
     mdl_data["mDL"].update(
         {
