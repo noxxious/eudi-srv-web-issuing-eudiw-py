@@ -8,7 +8,6 @@ def add_number_to_image(image_path, number):
     # Configure logging
     logger = cfgserv.app_logger
     logger.info("ADD_NUMBER_TO_IMAGE")
-    print("ADD_NUMBER_TO_IMAGE")
 
     # Open the image file
     with Image.open(image_path) as img:
@@ -25,14 +24,11 @@ def add_number_to_image(image_path, number):
             # Attempt to load the Font Awesome font with a larger size for visibility
             font = ImageFont.truetype(font_path, size=150)  # Increase the font size to make it visible
             logger.info(f"Successfully loaded Font Awesome font from {font_path}")
-            print(f"Successfully loaded Font Awesome font from {font_path}")
         except IOError as e:
             # Log error if font loading fails
             logger.error(f"Failed to load Font Awesome font from {font_path}: {e}")
-            print(f"Failed to load Font Awesome font from {font_path}: {e}")
             font = ImageFont.load_default()  # Fallback to default font
             logger.info("Falling back to default font")
-            print("Falling back to default font")
 
         # Text (can be a number or a Font Awesome icon Unicode)
         text = str(number)  # The number to be added on the image
@@ -42,7 +38,7 @@ def add_number_to_image(image_path, number):
 
         # Calculate text width and height from the bounding box
         text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
+        text_height = 150
 
         # Get the size of the image
         img_width, img_height = img.size
@@ -52,7 +48,6 @@ def add_number_to_image(image_path, number):
 
         # Log text position and size for debugging
         logger.info(f"Text position: {position}, Text size: {text_width}x{text_height}")
-        print(f"Text position: {position}, Text size: {text_width}x{text_height}")
 
         # Draw the text directly on the image (using red color for visibility)
         draw.text(position, text, font=font, fill=(255, 0, 0))  # Red text for better visibility
