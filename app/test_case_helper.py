@@ -35,12 +35,10 @@ def add_number_to_image(image_path, number):
         debug_position = (10, 10)  # Top-left corner
         draw.text(debug_position, "Test", font=font, fill=(255, 0, 0))  # Red text for better visibility
 
-        # Get the bounding box for the text (to center it)
-        bbox = draw.textbbox((0, 0), text, font=font)
-
-        # Calculate text width and height from the bounding box
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
+        # Manually calculate text width and height
+        text_width = font.getlength(text)  # Get the width of the text
+        font_ascent, font_descent = font.getmetrics()  # Get font metrics
+        text_height = font_ascent + font_descent  # Calculate text height
 
         # Get the size of the image
         img_width, img_height = img.size
@@ -52,6 +50,12 @@ def add_number_to_image(image_path, number):
         logger.info(f"Text position: {position}, Text size: {text_width}x{text_height}")
 
         # Debug: Draw a rectangle around the text area to visualize the bounding box
+        bbox = (
+            position[0],  # Left
+            position[1],  # Top
+            position[0] + text_width,  # Right
+            position[1] + text_height,  # Bottom
+        )
         draw.rectangle(bbox, outline="blue")
 
         # Draw the text directly on the image (using red color for visibility)
