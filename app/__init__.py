@@ -28,6 +28,7 @@ import sys
 sys.path.append(os.path.dirname(__file__))
 
 from flask import Flask, render_template, request, send_from_directory
+from flask.logging import default_handler
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
@@ -52,17 +53,16 @@ from .app_config.config_service import ConfService as log
 
 oidc_metadata = {}
 openid_metadata = {}
+oauth_metadata = {}
 trusted_CAs = {}
 
 
 def setup_metadata():
     global oidc_metadata
     global openid_metadata
+    global oauth_metadata
 
-    oidc_metadata, openid_metadata = build_metadata(cfgserv)
-
-setup_metadata()
-
+    oidc_metadata, openid_metadata, oauth_metadata = build_metadata(cfgserv)
 
 def setup_trusted_CAs():
     global trusted_CAs
@@ -129,9 +129,6 @@ def setup_trusted_CAs():
     trusted_CAs = ec_keys
 
 
-setup_trusted_CAs()
-
-
 def handle_exception(e):
     # pass through HTTP errors
     if isinstance(e, HTTPException):
@@ -161,8 +158,13 @@ def page_not_found(e):
 
 
 def create_app(test_config=None):
+    setup_metadata()
+    setup_trusted_CAs()
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+
+    app.logger.removeHandler(default_handler)
 
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)
@@ -177,6 +179,10 @@ def create_app(test_config=None):
     def favicon():
         return send_from_directory("static/images", "favicon.ico")
 
+    @app.route("/ic-logo.png")
+    def logo():
+        return send_from_directory("static/images", "ic-logo.png")
+    
     app.config.from_mapping(SECRET_KEY="dev")
 
     if test_config is None:

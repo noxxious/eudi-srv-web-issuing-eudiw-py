@@ -33,8 +33,18 @@ ENV HOST=0.0.0.0
 ENV EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"
 ENV DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
 ENV SERVICE_URL="http://127.0.0.1:${PORT}/"
+ENV WALLET_TEST_URL="https://dev.tester.issuer.eudiw.dev/"
+ENV REVOCATION_SERVICE_URL="https://issuer.eudiw.dev/token_status_list/take"
+ENV PID_ISSUING_AUTHORITY = "Test PID issuer"
+ENV PID_ORGANIZATION_ID = "EUDI Wallet Reference Implementation"
+ENV MDL_ISSUING_AUTHORITY = "EUDI Wallet Reference Implementation"
+ENV QEAA_ISSUING_AUTHORITY =  "EUDI Wallet Reference Implementation"
+
+# Secrets
 ENV FLASK_SECRET="secret"
 ENV EIDASNODE_LIGHTTOKEN_SECRET="secret"
+ENV REVOCATION_API_KEY="secret"
+
 ENV FLASK_RUN_PORT=$PORT
 ENV FLASK_RUN_HOST=$HOST
 ENV REQUESTS_CA_BUNDLE=/app/secrets/cert.pem
@@ -44,10 +54,15 @@ ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 EXPOSE $PORT
 
+# SSL certificates
 VOLUME /app/secrets/cert.pem
 VOLUME /app/secrets/cert.key
+
+# Issuer certificates
 VOLUME /etc/eudiw/pid-issuer/privKey
 VOLUME /etc/eudiw/pid-issuer/cert
+
+# Log files
 VOLUME /tmp/log_dev
 
 #ENV FLASK_APP=app \

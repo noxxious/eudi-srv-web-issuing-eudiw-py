@@ -62,6 +62,7 @@ from misc import (
     scope2details,
     calculate_age,
     validate_image,
+    vct2scope,
 )
 from dynamic_func import dynamic_formatter
 from . import oidc_metadata
@@ -215,7 +216,7 @@ def dynamic_R1(country):
             "dynamic/mdl-test-case-form.html",
             mandatory_attributes=attributesForm,
             optional_attributes=attributesForm2,
-            redirect_url=cfgserv.service_url + "dynamic/mdl_test_case_form",
+            redirect_url=urljoin(cfgserv.service_url, "/dynamic/mdl_test_case_form"),
         )
 
     if country == "LT-PID":
@@ -229,7 +230,7 @@ def dynamic_R1(country):
             "dynamic/pid-test-case-form.html",
             mandatory_attributes=attributesForm,
             optional_attributes=attributesForm2,
-            redirect_url=cfgserv.service_url + "dynamic/pid_test_case_form",
+            redirect_url=urljoin(cfgserv.service_url, "dynamic/pid_test_case_form"),
         )
 
     elif country == "sample":
@@ -769,7 +770,7 @@ def credentialCreation(credential_request, data, country):
                 "format"
             ]
         elif "vct" in credential and "format" in credential:
-            doctype = credentials_supported[credential["vct"]]["scope"]
+            doctype = vct2scope(credential["vct"])
             format = credential["format"]
 
         elif "format" in credential and "doctype" in credential:
@@ -1158,7 +1159,7 @@ def pid_test_case_form():
     pid_data["PID"].update({"age_over_18": True if calculate_age(pid_data["PID"]["birth_date"]) >= 18 else False})
     pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
 
-    return render_template("dynamic/form_authorize.html", presentation_data=pid_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
+    return render_template("dynamic/form_authorize.html", presentation_data=pid_data, user_id="LT." + user_id, redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet"))
 
 
 @dynamic.route("/mdl_test_case_form", methods=["GET", "POST"])
@@ -1618,7 +1619,7 @@ def mdl_test_case_form():
     # convert portrait from url safe base64 to regular base64
     # mdl_data["mDL"].update({"portrait": base64.b64encode(base64.urlsafe_b64decode(mdl_data["mDL"]["portrait"])).decode("utf-8")})
 
-    return render_template("dynamic/form_authorize.html", presentation_data=mdl_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
+    return render_template("dynamic/form_authorize.html", presentation_data=mdl_data, user_id="LT." + user_id, redirect_url=urljoin(cfgserv.service_url, "/dynamic/redirect_wallet"))
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])
 def redirect_wallet():
