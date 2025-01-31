@@ -19,7 +19,11 @@ def add_number_to_image(image_path, number):
 
         # Get size of the image and text to center the text
         img_width, img_height = img.size
-        text_width, text_height = draw.textsize(text, font)
+
+        # Use textbbox to get the bounding box of the text
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]  # Width of the bounding box
+        text_height = bbox[3] - bbox[1]  # Height of the bounding box
 
         # Calculate position to center the text
         position = ((img_width - text_width) // 2, (img_height - text_height) // 2)
