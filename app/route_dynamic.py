@@ -1568,10 +1568,6 @@ def mdl_test_case_form():
 
     mdl_data = json.loads(test_json)
 
-    logger = cfgserv.app_logger
-
-    logger.info("PRE_ADD_NUMBER_TO_IMAGE")
-
     if mdl_data["mDL"]["portrait"] == "M":
         mdl_data["mDL"]["portrait"] = add_number_to_image(Path(__file__).parent / 'static' / 'image.jpeg', test_case_number)
     else:
