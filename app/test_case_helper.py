@@ -5,7 +5,6 @@ import base64
 from io import BytesIO
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def add_number_to_image(image_path, number):
