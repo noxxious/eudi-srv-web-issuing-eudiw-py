@@ -61,9 +61,6 @@ def setup_metadata():
 
     oidc_metadata, openid_metadata = build_metadata(cfgserv)
 
-setup_metadata()
-
-
 def setup_trusted_CAs():
     global trusted_CAs
 
@@ -128,10 +125,6 @@ def setup_trusted_CAs():
 
     trusted_CAs = ec_keys
 
-
-setup_trusted_CAs()
-
-
 def handle_exception(e):
     # pass through HTTP errors
     if isinstance(e, HTTPException):
@@ -161,6 +154,9 @@ def page_not_found(e):
 
 
 def create_app(test_config=None):
+    setup_metadata()
+    setup_trusted_CAs()
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
@@ -206,6 +202,7 @@ def create_app(test_config=None):
         route_oid4vp,
         preauthorization,
     )
+    from .test_cases import lt as lt_testcases
 
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
@@ -213,6 +210,8 @@ def create_app(test_config=None):
     app.register_blueprint(route_oid4vp.oid4vp)
     app.register_blueprint(route_dynamic.dynamic)
     app.register_blueprint(preauthorization.preauth)
+    app.register_blueprint(lt_testcases.mdl.blueprint)
+    app.register_blueprint(lt_testcases.pid.blueprint)
 
     # config session
     app.config["SESSION_FILE_THRESHOLD"] = 50

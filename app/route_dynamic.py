@@ -28,22 +28,16 @@ from datetime import timedelta
 import io
 import json
 import base64
-from formatter_func import cbor2elems
-import threading
-import schedule
-import time
 from uuid import uuid4
 from PIL import Image
-from flask import Blueprint, Flask, make_response, redirect, render_template, request, session, jsonify
+from flask import Blueprint, Flask, redirect, render_template, request, session
 from flask_api import status
 from flask_cors import CORS
 import requests
-import urllib.parse
 from app.lighttoken import handle_response
-from app.validate_vp_token import validate_vp_token
 from urllib.parse import urljoin
 from pathlib import Path
-from test_case_helper import *
+from app.test_cases.helper import *
 
 from boot_validate import (
     validate_mandatory_args,
@@ -71,7 +65,6 @@ dynamic = Blueprint("dynamic", __name__, url_prefix="/dynamic")
 CORS(dynamic)  # enable CORS on the blue print
 
 # secrets
-from app_config.config_secrets import flask_secret_key
 
 app = Flask(__name__)
 #app.config["SECRET_KEY"] = flask_secret_key
@@ -121,14 +114,14 @@ def Supported_Countries():
     session["credentials_requested"] = credentials_requested
 
     display_countries = {}
-    for country in cfgcountries.supported_countries:
+    for country, country_config in cfgcountries.supported_countries.items():
         res = all(
-            ele in cfgcountries.supported_countries[country]["supported_credentials"]
+            ele in country_config["supported_credentials"]
             for ele in credentials_requested
         )
         if res:
             display_countries.update(
-                {str(country): str(cfgcountries.supported_countries[country]["name"])}
+                {str(country): str(country_config["name"])}
             )
 
     form_keys = request.form.keys()
@@ -179,6 +172,7 @@ def dynamic_R1(country):
     country -- Country selected by user
     """
 
+    country_config = cfgcountries.supported_countries[country]
     credentials_requested = session["credentials_requested"]
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
@@ -204,34 +198,6 @@ def dynamic_R1(country):
             redirect_url=urljoin(cfgserv.service_url, "dynamic/form"),
         )
 
-    if country == "LT":
-        attributesForm = getAttributesForm(session["credentials_requested"])
-        if "user_pseudonym" in attributesForm:
-            attributesForm.update({"user_pseudonym": str(uuid4())})
-
-        attributesForm2 = getAttributesForm2(session["credentials_requested"])
-
-        return render_template(
-            "dynamic/mdl-test-case-form.html",
-            mandatory_attributes=attributesForm,
-            optional_attributes=attributesForm2,
-            redirect_url=cfgserv.service_url + "dynamic/mdl_test_case_form",
-        )
-
-    if country == "LT-PID":
-        attributesForm = getAttributesForm(session["credentials_requested"])
-        if "user_pseudonym" in attributesForm:
-            attributesForm.update({"user_pseudonym": str(uuid4())})
-
-        attributesForm2 = getAttributesForm2(session["credentials_requested"])
-
-        return render_template(
-            "dynamic/pid-test-case-form.html",
-            mandatory_attributes=attributesForm,
-            optional_attributes=attributesForm2,
-            redirect_url=cfgserv.service_url + "dynamic/pid_test_case_form",
-        )
-
     elif country == "sample":
         user_id = generate_unique_id()
 
@@ -252,12 +218,24 @@ def dynamic_R1(country):
                 },
             )
         )
+    elif country_config["connection_type"] == "testcase":
+        attributesForm = getAttributesForm(session["credentials_requested"])
+        if "user_pseudonym" in attributesForm:
+            attributesForm.update({"user_pseudonym": str(uuid4())})
 
-    elif cfgcountries.supported_countries[country]["connection_type"] == "eidasnode":
-        return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
+        attributesForm2 = getAttributesForm2(session["credentials_requested"])
 
-    elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
-        country_data = cfgcountries.supported_countries[country]["oidc_auth"].copy()
+        return render_template(
+            country_config["template"],
+            mandatory_attributes=attributesForm,
+            optional_attributes=attributesForm2,
+            redirect_url=country_config["testcase_redirect_uri"],
+        )
+    elif country_config["connection_type"] == "eidasnode":
+        return redirect(country_config["pid_url_oidc"])
+
+    elif country_config["connection_type"] == "oauth":
+        country_data = country_config["oidc_auth"].copy()
 
         url = country_data["url"] + "redirect_uri=" + country_data["redirect_uri"]
 
@@ -291,16 +269,16 @@ def dynamic_R1(country):
 
         return redirect(url)
 
-    elif cfgcountries.supported_countries[country]["connection_type"] == "openid":
+    elif country_config["connection_type"] == "openid":
 
-        country_data = cfgcountries.supported_countries[country]["oidc_auth"]
+        country_data = country_config["oidc_auth"]
 
-        metadata_url = country_data["base_url"] + "/.well-known/openid-configuration"
+        metadata_url = urljoin(country_data["base_url"], "/.well-known/openid-configuration")
         metadata_json = requests.get(metadata_url).json()
 
         authorization_endpoint = metadata_json["authorization_endpoint"]
 
-        url = authorization_endpoint + "?redirect_uri=" + country_data["redirect_uri"]
+        url = urljoin(authorization_endpoint, "?redirect_uri=" + country_data["redirect_uri"])
 
         if country == "EE":
             country_data["state"] = country + "." + session["jws_token"]
@@ -329,6 +307,8 @@ def red():
     Return: Redirect answer to returnURL.
     """
     session["route"] = "/dynamic/redirect"
+
+    country_config = cfgcountries.supported_countries[session["country"]]
 
     if session["country"] == "PT":
 
@@ -383,7 +363,7 @@ def red():
             
         for id in credential_requested:
             doctype= credentialsSupported[id]["doctype"]
-            portuguese_fields.update({doctype:cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"][doctype]})
+            portuguese_fields.update({doctype:country_config["oidc_auth"]["scope"][doctype]})
 
         for doctype in portuguese_fields:
             for fields in portuguese_fields[doctype]:
@@ -451,14 +431,12 @@ def red():
         )
     
     
-    metadata_url = cfgcountries.supported_countries[session["country"]]["oidc_auth"]["base_url"] + "/.well-known/openid-configuration"
+    metadata_url = urljoin(country_config["oidc_auth"]["base_url"], "/.well-known/openid-configuration")
     metadata_json = requests.get(metadata_url).json()
 
     token_endpoint = metadata_json["token_endpoint"]
 
-    redirect_data = cfgcountries.supported_countries[session["country"]][
-        "oidc_redirect"
-    ]
+    redirect_data = country_config["oidc_redirect"]
 
     #url = redirect_data["url"]
     headers = redirect_data["headers"]
@@ -590,8 +568,10 @@ def dynamic_R2():
     session["version"] = cfgserv.current_version
     session["route"] = "/dynamic/form_R2"
 
+    country_config = cfgcountries.configured_countries["country"]
+
     data = dynamic_R2_data_collect(
-        country=country, user_id=user_id
+        country=country, user_id=user_id, country_config=country_config,
     )
 
     if "error" in data:
@@ -600,13 +580,16 @@ def dynamic_R2():
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
 
     credential_response = credentialCreation(
-        credential_request=credential_request, data=data, country=country
+        credential_request=credential_request,
+        data=data,
+        country=country,
+        country_config=country_config,
     )
 
     return credential_response
 
 
-def dynamic_R2_data_collect(country, user_id):
+def dynamic_R2_data_collect(country, user_id, country_config):
     """
     Funtion to get attributes from selected credential issuer country
 
@@ -624,19 +607,7 @@ def dynamic_R2_data_collect(country, user_id):
         session["country"] = data["issuing_country"]
 
         return data
-
-    if country == "LT":
-        data = form_dynamic_data.get(user_id, "Data not found")
-
-        if data == "Data not found":
-            return {"error": "error", "error_description": "Data not found"}
-
-        session["version"] = cfgserv.current_version
-        session["country"] = data["issuing_country"]
-
-        return data
-
-    if country == "LT-PID":
+    elif country_config["connection_type"] == "testcase":
         data = form_dynamic_data.get(user_id, "Data not found")
 
         if data == "Data not found":
@@ -658,11 +629,11 @@ def dynamic_R2_data_collect(country, user_id):
 
         return data
 
-    elif cfgcountries.supported_countries[country]["connection_type"] == "eidasnode":
+    elif country_config["connection_type"] == "eidasnode":
         (b, data) = handle_response(user_id)
 
-        if "custom_modifiers" in cfgcountries.supported_countries[country]:
-            custom_modifiers = cfgcountries.supported_countries[country][
+        if "custom_modifiers" in country_config:
+            custom_modifiers = country_config[
                 "custom_modifiers"
             ]
             for modifier in custom_modifiers:
@@ -671,8 +642,8 @@ def dynamic_R2_data_collect(country, user_id):
                     data.pop(custom_modifiers[modifier])
         return data
 
-    elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
-        attribute_request = cfgcountries.supported_countries[country][
+    elif country_config["connection_type"] == "oauth":
+        attribute_request = country_config[
             "attribute_request"
         ]
         url = attribute_request["url"] + user_id
@@ -694,13 +665,13 @@ def dynamic_R2_data_collect(country, user_id):
                 "invalid_credential_request", "openid connection failed"
             )
 
-    elif cfgcountries.supported_countries[country]["connection_type"] == "openid":
-        attribute_request = cfgcountries.supported_countries[country][
+    elif country_config["connection_type"] == "openid":
+        attribute_request = country_config[
             "attribute_request"
         ]
 
         metadata_url = (
-            cfgcountries.supported_countries[session["country"]]["oidc_auth"][
+            country_config["oidc_auth"][
                 "base_url"
             ]
             + "/.well-known/openid-configuration"
@@ -724,9 +695,9 @@ def dynamic_R2_data_collect(country, user_id):
             data = json_response
             if (
                 "custom_modifiers"
-                in cfgcountries.supported_countries[country]["attribute_request"]
+                in country_config["attribute_request"]
             ):
-                custom_modifiers = cfgcountries.supported_countries[country][
+                custom_modifiers = country_config[
                     "attribute_request"
                 ]["custom_modifiers"]
                 for modifier in custom_modifiers:
@@ -743,7 +714,7 @@ def dynamic_R2_data_collect(country, user_id):
         credential_error_resp("invalid_credential_request", "Not supported")
 
 
-def credentialCreation(credential_request, data, country):
+def credentialCreation(credential_request, data, country, country_config):
     """
     Function to create credentials requested by user
 
@@ -800,14 +771,14 @@ def credentialCreation(credential_request, data, country):
             form_data = data
 
         elif (
-            cfgcountries.supported_countries[country]["connection_type"] == "eidasnode"
+            country_config["connection_type"] == "eidasnode"
         ):
             form_data = data
 
-        elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
+        elif country_config["connection_type"] == "oauth":
             if country == "PT":
 
-                portuguese_fields = cfgcountries.supported_countries[country][
+                portuguese_fields = country_config[
                     "oidc_auth"
                 ]["scope"][doctype]
 
@@ -832,9 +803,9 @@ def credentialCreation(credential_request, data, country):
                 for attribute in data:
                     form_data[attribute] = data[attribute]
 
-        elif cfgcountries.supported_countries[country]["connection_type"] == "openid":
+        elif country_config["connection_type"] == "openid":
             if country == "PT":
-                portuguese_fields = cfgcountries.supported_countries[country]["oidc"][
+                portuguese_fields = country_config["oidc"][
                     "scope"
                 ][doctype]
 
@@ -870,7 +841,7 @@ def credentialCreation(credential_request, data, country):
             }
         )
 
-        pdata = dynamic_formatter(format, doctype, form_data, device_publickey)
+        pdata = dynamic_formatter(format, doctype, form_data, device_publickey, country_config)
 
         credential_response["credential_responses"].append({"credential": pdata})
 
@@ -1078,540 +1049,6 @@ def Dynamic_form():
             presentation_data[credential].pop("NumberCategories")
 
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet" ))
-
-
-@dynamic.route("/pid_test_case_form", methods=["GET", "POST"])
-def pid_test_case_form():
-    """Form page for test cases.
-    Form page where the user can select mDL test case.
-    """
-    session["route"] = "/dynamic/pid_test_case_form"
-    session["version"] = "0.5"
-    session["country"] = "LT"
-    # if GET
-    if request.method == "GET":
-        # print("/pid/form GET: " + str(request.args))
-        if (
-                session.get("country") is None or session.get("returnURL") is None
-        ):  # someone is trying to connect directly to this endpoint
-            return (
-                "Error 101: " + cfgserv.error_list["101"] + "\n",
-                status.HTTP_400_BAD_REQUEST,
-            )
-
-    if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template('misc/auth_method.html')
-
-    form_data = request.form.to_dict()
-
-    test_case = form_data.get("case", "1")
-
-    match test_case:
-        case "1":
-            test_json = """
-            {
-              "PID": {
-                "family_name": "Pavarde",
-                "given_name": "Vardas",
-                "birth_date": "2008-07-10"
-              }
-            }
-            """
-        case _:
-            test_json = """
-            {
-              "PID": {
-                "family_name": "Simpsoniene",
-                "given_name": "Marge",
-                "birth_date": "1966-03-18"
-              }
-            }
-            """
-
-    user_id = generate_unique_id()
-
-    pid_data = json.loads(test_json)
-
-    pid_data["PID"].update(
-        {
-            "issuing_country": session["country"],
-            "issuing_authority": cfgserv.pid_issuing_authority,
-        }
-    )
-
-    form_dynamic_data[user_id] = pid_data["PID"].copy()
-    form_dynamic_data[user_id].update({"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
-
-    if "jws_token" not in session or "authorization_params" in session:
-        session["jws_token"] = session["authorization_params"]["token"]
-    session["returnURL"] = cfgserv.OpenID_first_endpoint
-
-    doctype_config = cfgserv.config_doctype["eu.europa.ec.eudi.pid.1"]
-
-    today = date.today()
-    expiry = today + timedelta(days=doctype_config["validity"])
-
-    pid_data["PID"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
-    pid_data["PID"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
-    pid_data["PID"].update({"issuing_country": session["country"]}),
-    pid_data["PID"].update({"issuing_authority": doctype_config["issuing_authority"]})
-    pid_data["PID"].update({"age_over_18": True if calculate_age(pid_data["PID"]["birth_date"]) >= 18 else False})
-    pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
-
-    return render_template("dynamic/form_authorize.html", presentation_data=pid_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
-
-
-@dynamic.route("/mdl_test_case_form", methods=["GET", "POST"])
-def mdl_test_case_form():
-    """Form page for test cases.
-    Form page where the user can select mDL test case.
-    """
-    session["route"] = "/dynamic/mdl_test_case_form"
-    session["version"] = "0.5"
-    session["country"] = "LT"
-    # if GET
-    if request.method == "GET":
-        # print("/pid/form GET: " + str(request.args))
-        if (
-                session.get("country") is None or session.get("returnURL") is None
-        ):  # someone is trying to connect directly to this endpoint
-            return (
-                "Error 101: " + cfgserv.error_list["101"] + "\n",
-                status.HTTP_400_BAD_REQUEST,
-            )
-
-    if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template('misc/auth_method.html')
-
-    form_data = request.form.to_dict()
-
-    test_case_number = int(form_data.get("case", "1"))
-    test_case = str(test_case_number)
-
-    # this is needed because of signature_usual_mark and usual_mark field uncertainty between ISO and POTENTIAL UC4 Test event doc
-    if test_case_number > 8:
-        test_case =  str(test_case_number - 8)
-
-    match test_case:
-        case "1":
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "Pavarde",
-                "given_name": "Vardas",
-                "birth_date": "2008-07-10",
-                "document_number": "002447688",
-                "portrait": "M",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "2023-10-19"
-                  }
-                ]
-              }
-            }
-            """
-        case "2":
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "Simpsoniene",
-                "given_name": "Marge",
-                "birth_date": "1966-03-18",
-                "document_number": "00111111",
-                "portrait": "F",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "B1",
-                    "issue_date": "1990-04-20"
-                  },
-                  {
-                    "vehicle_category_code": "B",
-                    "issue_date": "1990-04-20"
-                  },
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "1990-04-20"
-                  }
-                ]
-              }
-            }
-            """
-        case "3":
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "Simpsonaite",
-                "given_name": "Lisa",
-                "birth_date": "1966-03-18",
-                "document_number": "00222222",
-                "portrait": "F",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "B1",
-                    "issue_date": "1990-04-20",
-                    "codes": [
-                      {
-                        "code": "1.06"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "B",
-                    "issue_date": "1990-04-20",
-                    "codes": [
-                      {
-                        "code": "1.06"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "1990-04-20",
-                    "codes": [
-                      {
-                        "code": "1.06"
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-            """
-        case "4":
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "Homeris",
-                "given_name": "Simpson",
-                "birth_date": "1954-05-19",
-                "document_number": "00333333",
-                "portrait": "M",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "B1",
-                    "issue_date": "1990-04-20",
-                    "codes": [
-                      {
-                        "code": "1.01"
-                      },
-                      {
-                        "code": "02"
-                      },
-                      {
-                        "code": "64",
-                        "sign": "=",
-                        "value": "100"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "B",
-                    "issue_date": "1990-04-20",
-                    "codes": [
-                      {
-                        "code": "1.01"
-                      },
-                      {
-                        "code": "02"
-                      },
-                      {
-                        "code": "64",
-                        "sign": "=",
-                        "value": "100"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "1990-04-20",
-                    "codes": [
-                      {
-                        "code": "1.01"
-                      },
-                      {
-                        "code": "02"
-                      },
-                      {
-                        "code": "64",
-                        "sign": "=",
-                        "value": "100"
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-            """
-        case "5":
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "Sunus Simpsonas",
-                "given_name": "Bartas",
-                "birth_date": "1960-01-06",
-                "document_number": "00444444",
-                "portrait": "M",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "A",
-                    "issue_date": "1992-02-11",
-                    "codes": [
-                      {
-                        "code": "79.03"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "B1",
-                    "issue_date": "1992-02-11"
-                  },
-                  {
-                    "vehicle_category_code": "B",
-                    "issue_date": "1992-02-11"
-                  },
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "1992-02-11"
-                  }
-                ]
-              }
-            }
-            """
-        case "6":
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "SHACHAR",
-                "given_name": "MATTHEW MICHAEL CHARLES",
-                "birth_date": "1960-01-06",
-                "document_number": "00555555",
-                "portrait": "M",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "B1",
-                    "issue_date": "2020-11-07",
-                    "codes": [
-                      {
-                        "code": "78"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "B",
-                    "issue_date": "2020-11-07",
-                    "codes": [
-                      {
-                        "code": "78"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "2020-11-07"
-                  }
-                ]
-              }
-            }
-            """
-        case "7":
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "KORS",
-                "given_name": "MICHAEL",
-                "birth_date": "1968-02-01",
-                "document_number": "00666666",
-                "portrait": "M",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "A1",
-                    "issue_date": "1990-07-03"
-                  },
-                  {
-                    "vehicle_category_code": "A2",
-                    "issue_date": "1990-07-03"
-                  },
-                  {
-                    "vehicle_category_code": "A",
-                    "issue_date": "1990-07-03"
-                  },
-                  {
-                    "vehicle_category_code": "B1",
-                    "issue_date": "1987-01-09"
-                  },
-                  {
-                    "vehicle_category_code": "B",
-                    "issue_date": "1987-01-09"
-                  },
-                  {
-                    "vehicle_category_code": "C1",
-                    "issue_date": "1987-01-09",
-                    "expiry_date": "2027-11-27",
-                    "codes": [
-                      {
-                        "code": "95"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "C",
-                    "issue_date": "1987-01-09",
-                    "expiry_date": "2027-11-27",
-                    "codes": [
-                      {
-                        "code": "95"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "D1",
-                    "issue_date": "1990-07-03",
-                    "expiry_date": "2024-11-27"
-                  },
-                  {
-                    "vehicle_category_code": "D",
-                    "issue_date": "1990-07-03",
-                    "expiry_date": "2024-11-27"
-                  },
-                  {
-                    "vehicle_category_code": "BE",
-                    "issue_date": "1990-07-03"
-                  },
-                  {
-                    "vehicle_category_code": "C1E",
-                    "issue_date": "1990-07-03",
-                    "expiry_date": "2027-11-27",
-                    "codes": [
-                      {
-                        "code": "95"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "CE",
-                    "issue_date": "1990-07-03",
-                    "expiry_date": "2027-11-27",
-                    "codes": [
-                      {
-                        "code": "95"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "D1E",
-                    "issue_date": "1991-07-03",
-                    "expiry_date": "2024-11-27"
-                  },
-                  {
-                    "vehicle_category_code": "DE",
-                    "issue_date": "1991-07-03",
-                    "expiry_date": "2024-11-27"
-                  },
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "1987-01-09"
-                  }
-                ]
-              }
-            }
-            """
-        case _:
-            test_json = """
-            {
-              "mDL": {
-                "family_name": "Jonas",
-                "given_name": "Jonaitis",
-                "birth_date": "1960-01-06",
-                "document_number": "00777777",
-                "portrait": "M",
-                "driving_privileges": [
-                  {
-                    "vehicle_category_code": "B1",
-                    "issue_date": "2019-12-24",
-                    "codes": [
-                      {
-                        "code": "78"
-                      },
-                      {
-                        "code": "70.CND"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "B",
-                    "issue_date": "2019-12-24",
-                    "codes": [
-                      {
-                        "code": "78"
-                      },
-                      {
-                        "code": "70.CND"
-                      }
-                    ]
-                  },
-                  {
-                    "vehicle_category_code": "AM",
-                    "issue_date": "2019-12-24",
-                    "codes": [
-                      {
-                        "code": "70.CND"
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-            """
-
-    user_id = generate_unique_id()
-
-    mdl_data = json.loads(test_json)
-
-    if mdl_data["mDL"]["portrait"] == "M":
-        mdl_data["mDL"]["portrait"] = add_number_to_image(Path(__file__).parent / 'static' / 'image.jpeg', test_case_number)
-    else:
-        mdl_data["mDL"]["portrait"] = add_number_to_image(Path(__file__).parent / 'static' / 'image2.jpeg', test_case_number)
-
-    # add signature field (depending on test case number either to signature_usual_mark or usual_mark field
-    signature_path = Path(__file__).parent / 'static' / 'signature.jpg'
-
-    if test_case_number > 8:
-        mdl_data["mDL"].update({"usual_mark": convert_image_to_base64(signature_path)})
-    else:
-        mdl_data["mDL"].update({"signature_usual_mark": convert_image_to_base64(signature_path)})
-
-    mdl_data["mDL"].update(
-        {
-            "issuing_country": session["country"],
-            "issuing_authority": cfgserv.mdl_issuing_authority,
-        }
-    )
-
-    form_dynamic_data[user_id] = mdl_data["mDL"].copy()
-    form_dynamic_data[user_id].update({"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
-
-    if "jws_token" not in session or "authorization_params" in session:
-        session["jws_token"] = session["authorization_params"]["token"]
-    session["returnURL"] = cfgserv.OpenID_first_endpoint
-
-    doctype_config = cfgserv.config_doctype["org.iso.18013.5.1.mDL"]
-
-    today = date.today()
-    expiry = today + timedelta(days=doctype_config["validity"])
-
-    for privilege in mdl_data["mDL"]["driving_privileges"]:
-        if "expiry_date" not in privilege:
-            privilege["expiry_date"] = expiry.strftime("%Y-%m-%d")
-
-    mdl_data["mDL"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
-    mdl_data["mDL"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
-    mdl_data["mDL"].update({"issuing_country": session["country"]}),
-    mdl_data["mDL"].update({"issuing_authority": doctype_config["issuing_authority"]})
-    mdl_data["mDL"].update({"age_over_18": True if calculate_age(mdl_data["mDL"]["birth_date"]) >= 18 else False})
-    mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
-
-    return render_template("dynamic/form_authorize.html", presentation_data=mdl_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])
 def redirect_wallet():

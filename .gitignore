@@ -203,3 +203,5 @@ app/tests/output.xml
 app/tests/report.html
 log/
 .idea/
+
+deploy.sh

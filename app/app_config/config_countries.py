@@ -34,7 +34,7 @@ class ConfCountries:
 
     formCountry = "FC"
     # supported countries
-    supported_countries = {
+    configured_countries = {
         "EU": {
             "name": "nodeEU",
             "pid_url_oidc": urljoin(
@@ -129,7 +129,6 @@ class ConfCountries:
         "EE": {
             "name": "Estonia",
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_EE.pem",
-            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EE.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EE_cert.der",
             "supported_credentials": [
@@ -163,7 +162,9 @@ class ConfCountries:
         },
         "CZ": {
             "name": "Czechia",
-            "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=CZ",
+            "pid_url_oidc": urljoin(
+                cfgserv.service_url, "eidasnode/lightrequest?country=CZ"
+            ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_CZ.pem",
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_CZ.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
@@ -174,11 +175,13 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
             ],
             "connection_type": "eidasnode",
-            "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
+            "dynamic_R2": urljoin(cfgserv.service_url, "eidasnode/dynamic_R2"),
         },
         "NL": {
             "name": "Netherland",
-            "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=NL",
+            "pid_url_oidc": urljoin(
+                cfgserv.service_url, "eidasnode/lightrequest?country=NL"
+            ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_NL.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_NL_cert.der",
@@ -188,11 +191,13 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
             ],
             "connection_type": "eidasnode",
-            "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
+            "dynamic_R2": urljoin(cfgserv.service_url, "eidasnode/dynamic_R2"),
         },
         "LU": {
             "name": "Luxembourg",
-            "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=LU",
+            "pid_url_oidc": urljoin(
+                cfgserv.service_url, "eidasnode/lightrequest?country=LU"
+            ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LU.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LU_cert.der",
@@ -207,24 +212,27 @@ class ConfCountries:
                 "birth_date": "DateOfBirth",
             },
             "connection_type": "eidasnode",
-            "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
+            "dynamic_R2": urljoin(cfgserv.service_url, "eidasnode/dynamic_R2"),
         },
-        "LT": {
-            "name": "Test Case LT",
-            "pid_url": urljoin(cfgserv.service_url, "pid/form"),
+        "LT-mDL": {
+            "name": "Lithuania mDL Test Cases",
+            "connection_type": "testcase",
+            "template": "dynamic/mdl-test-case-form.html", 
+            "testcase_redirect_url": urljoin(cfgserv.service_url, "testcase/lt/mdl_test_case_form"),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/MDL-DS-0001_LT_DEV.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/MDL-DS-0001_LT_DEV.cert.der",
             "un_distinguishing_sign": "LT",
             "supported_credentials": [
-                "eu.europa.ec.eudi.mdl_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
             ],
             "dynamic_R2": urljoin(cfgserv.service_url, "dynamic/form_R2"),
         },
         "LT-PID": {
-            "name": "Test Case LT",
-            "pid_url": urljoin(cfgserv.service_url, "pid/form"),
+            "name": "Lithuania PID Test Cases",
+            "connection_type": "testcase",
+            "template": "dynamic/pid-test-case-form.html", 
+            "testcase_redirect_url": urljoin(cfgserv.service_url, "testcase/lt/mdl/pid_test_case_form"),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LT_DEV.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LT_DEV.cert.der",
@@ -235,4 +243,9 @@ class ConfCountries:
             ],
             "dynamic_R2": urljoin(cfgserv.service_url, "dynamic/form_R2"),
         },
+    }
+    supported_countries = {
+        k: v
+        for k, v in configured_countries.items()
+        if (k in cfgserv.enabled_countries) or not cfgserv.enabled_countries
     }

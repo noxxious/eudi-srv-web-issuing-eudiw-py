@@ -4,20 +4,25 @@ from PIL import Image, ImageDraw, ImageFont
 import base64
 from io import BytesIO
 
+
 def add_number_to_image(image_path, number):
     logger = cfgserv.app_logger
 
     with Image.open(image_path) as img:
-        img = img.convert('RGB')  # Ensure RGB mode for saving as JPG
+        img = img.convert("RGB")  # Ensure RGB mode for saving as JPG
         draw = ImageDraw.Draw(img)
 
         # Load the Arial font
-        font_path = Path(__file__).parent / 'static' / 'arial.ttf'
+        font_path = Path(__file__).parent / "static" / "arial.ttf"
         try:
             font = ImageFont.truetype(font_path, size=150)
         except IOError:
-            logger.error("No suitable font found. Please ensure a font is bundled with the application.")
-            raise ValueError("No suitable font found. Please ensure a font is bundled with the application.")
+            logger.error(
+                "No suitable font found. Please ensure a font is bundled with the application."
+            )
+            raise ValueError(
+                "No suitable font found. Please ensure a font is bundled with the application."
+            )
 
         # Prepare text and calculate its position
         text = str(number)
@@ -32,14 +37,15 @@ def add_number_to_image(image_path, number):
 
         # Save the modified image to a BytesIO object
         img_byte_array = BytesIO()
-        img.save(img_byte_array, format='JPEG')
+        img.save(img_byte_array, format="JPEG")
         img_byte_array.seek(0)
 
         # Encode the image to base64
-        base64_encoded_image = base64.b64encode(img_byte_array.read()).decode('utf-8')
+        base64_encoded_image = base64.b64encode(img_byte_array.read()).decode("utf-8")
 
         return base64_encoded_image
 
+
 def convert_image_to_base64(image_path):
     with open(image_path, "rb") as imagefile:
-        return base64.b64encode(imagefile.read()).decode('utf-8')
+        return base64.b64encode(imagefile.read()).decode("utf-8")

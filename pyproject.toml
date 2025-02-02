@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "eudi-srv-web-issuing-eudiw-py"
+version = "0.7.0"
+description = "The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service, supporting the OpenId4VCI (draft 13) protocol."
+authors = ["EU Digital Identity Wallet"]
+readme = "README.md"
+license = "Apache"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask-cors = "4.0.0"
+requests = "2.31.0"
+cbor2 = "5.4.6"
+pytz = "2023.4"
+flask = "2.3.3"
+pyignite = "0.6.1"
+tinyec = "0.4.0"
+pycryptodome = "3.20.0"
+config = "0.5.1"
+flask-api = "3.1"
+cbor-diag = "1.0.1"
+validators = "0.22.0"
+flask-session = "0.6.0"
+jsonschema = "4.21.1"
+werkzeug = "2.3.7"
+pycose = "1.0.1"
+cwt = "2.3.2"
+pyjwt = "2.8.0"
+schedule = "1.2.1"
+pillow = "10.2.0"
+segno = "1.6.1"
+qrcode-artistic = "3.0.2"
+gunicorn = "^23.0.0"
+pymdoccbor = { git = "https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git" }
+idpyoidc = { git = "https://github.com/eu-digital-identity-wallet/idpy-oidc.git" }
+openid4v = { git = "https://github.com/eu-digital-identity-wallet/openid4v.git" }
+sd-jwt = { git = "https://github.com/openwallet-foundation-labs/sd-jwt-python.git", rev = "9181a0a4514b7de2cc30a84d320b509e9fc5cb59" }
+fedservice = { git = "https://github.com/rohe/fedservice.git" }
+idpysdjwt = { git = "https://github.com/rohe/idpy-sdjwt.git" }
+google-cloud-logging = "^3.11.2"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+

@@ -75,8 +75,8 @@ jobs:
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}'
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'
 
       # NOTE: Alternative option - authentication via credentials json
       # - name: Google Auth
@@ -95,10 +95,10 @@ jobs:
           source: ./
           tag: latest
           flags: >-
-              --add-volume name=eudiw-lt-issuer-keys,type=cloud-storage,bucket=${{ vars.ISSUER_KEYS_BUCKET }} 
-              --add-volume-mount volume=eudiw-lt-issuer-keys,mount-path=/etc/eudiw/pid-issuer/privKey 
-              --add-volume name=eudiw-lt-trusted-ca,type=cloud-storage,bucket=${{ vars.TRUSTED_CA_BUCKET }} 
-              --add-volume-mount volume=eudiw-lt-trusted-ca,mount-path=/etc/eudiw/pid-issuer/cert  
+              --add-volume name=issuer-keys,type=cloud-storage,bucket=${{ vars.ISSUER_KEYS_BUCKET }} 
+              --add-volume-mount volume=issuer-keys,mount-path=/etc/eudiw/pid-issuer/privKey 
+              --add-volume name=trusted-ca,type=cloud-storage,bucket=${{ vars.TRUSTED_CA_BUCKET }} 
+              --add-volume-mount volume=trusted-ca,mount-path=/etc/eudiw/pid-issuer/cert  
               --port 5000
           secrets_update_strategy: overwrite
           secrets: |-
@@ -111,6 +111,7 @@ jobs:
             EIDAS_NODE_URL=${{ vars.EIDAS_NODE_URL }}
             DYNAMIC_PRESENTATION_URL=${{ vars.DYNAMIC_PRESENTATION_URL }}
             SERVICE_URL=${{ vars.SERVICE_URL }}
+            ENABLED_COUNTRIES=${{ vars.ENABLED_COUNTRIES }}
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
