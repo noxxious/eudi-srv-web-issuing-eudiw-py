@@ -56,6 +56,7 @@ from misc import (
     scope2details,
     calculate_age,
     validate_image,
+    vct2scope,
 )
 from dynamic_func import dynamic_formatter
 from . import oidc_metadata
@@ -740,7 +741,7 @@ def credentialCreation(credential_request, data, country, country_config):
                 "format"
             ]
         elif "vct" in credential and "format" in credential:
-            doctype = credentials_supported[credential["vct"]]["scope"]
+            doctype = vct2scope(credential["vct"])
             format = credential["format"]
 
         elif "format" in credential and "doctype" in credential:

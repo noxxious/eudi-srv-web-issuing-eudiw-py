@@ -52,14 +52,16 @@ from .app_config.config_service import ConfService as log
 
 oidc_metadata = {}
 openid_metadata = {}
+oauth_metadata = {}
 trusted_CAs = {}
 
 
 def setup_metadata():
     global oidc_metadata
     global openid_metadata
+    global oauth_metadata
 
-    oidc_metadata, openid_metadata = build_metadata(cfgserv)
+    oidc_metadata, openid_metadata, oauth_metadata = build_metadata(cfgserv)
 
 def setup_trusted_CAs():
     global trusted_CAs
@@ -173,6 +175,10 @@ def create_app(test_config=None):
     def favicon():
         return send_from_directory("static/images", "favicon.ico")
 
+    @app.route("/ic-logo.png")
+    def logo():
+        return send_from_directory("static/images", "ic-logo.png")
+    
     app.config.from_mapping(SECRET_KEY="dev")
 
     if test_config is None:

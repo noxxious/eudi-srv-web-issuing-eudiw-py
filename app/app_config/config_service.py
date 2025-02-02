@@ -35,13 +35,16 @@ class ConfService:
     # PID issuer service URL
     port = os.getenv("PORT", 5000)
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    service_url = os.getenv("SERVICE_URL", "https://192.168.0.172:5000/")
-    # service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL", "https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
-    # service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
+    #service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
     wallet_test_url = os.getenv(
-        "WALLET_TEST_URL", "https://dev.tester.issuer.eudiw.dev/"
+        "WALLET_TEST_URL",  "https://dev.tester.issuer.eudiw.dev/"
+    )
+
+    revocation_service_url = os.getenv(
+        "REVOCATION_SERVICE_URL", urljoin(service_url, "/token_status_list/take")
     )
 
     # ---------------------------------------------------------------------------
@@ -57,7 +60,7 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # eIDAS Node base href (used in lightrequest)
     eidasnode_url = os.getenv(
-        "EIDAS_NODE_URL", "https://preprod.issuer.eudiw.dev/EidasNode/"
+        "EIDAS_NODE_URL", urljoin(service_url, "/EidasNode/")
     )
 
     # Number of Tries for login in eidas node
@@ -101,10 +104,10 @@ class ConfService:
     pid_validity = 90
 
     # PID issuing Authority
-    pid_issuing_authority = "Test PID issuer"
+    pid_issuing_authority = os.getenv("PID_ISSUING_AUTHORITY", "Test PID issuer")
 
     # PID Organization ID
-    pid_organization_id = "EUDI Wallet Reference Implementation"
+    pid_organization_id = os.getenv("PID_ORG_ID", "EUDI Wallet Reference Implementation")
 
     # mDL namespace
     mdl_namespace = "org.iso.18013.5.1"
@@ -116,7 +119,7 @@ class ConfService:
     mdl_validity = 30
 
     # MDL issuing Authority
-    mdl_issuing_authority = "Regitra"
+    mdl_issuing_authority = os.getenv("MDL_ISSUING_AUTHORITY", "Test mDL issuer")
 
     # QEAA namespace
     qeaa_namespace = "eu.europa.ec.eudiw.qeaa.1"
@@ -125,19 +128,38 @@ class ConfService:
     qeaa_validity = 90
 
     # QEAA issuing Authority
-    qeaa_issuing_authority = "Test QEAA issuer"
+    qeaa_issuing_authority = os.getenv("QEAA_ISSUING_AUTHORITY", "Test QEAA issuer")
 
     # QEAA doctype
     qeaa_doctype = "eu.europa.ec.eudiw.qeaa.1"
 
     # OIDC4VC URL for initial page
-    oidc = urljoin(service_url, ".well-known/openid-credential-issuer")
+    oidc = urljoin(service_url, "/.well-known/openid-credential-issuer")
     # oidc = "https://preprod.issuer.eudiw.dev:4443/.well-known/openid-credential-issuer"
 
     # ------------------------------------------------------------------------------------------------
     # current version
     current_version = "0.6"
 
+    # IANA registered claims
+    Registered_claims = {
+        "birth_date": "birthdate",
+        "age_over_18": "age_equal_or_over.18",
+        "family_name_birth": "birth_family_name",
+        "given_name_birth": "birth_given_name",
+        "nationality": "nationalities",
+        "birth_place": "place_of_birth.locality",
+        "birth_country": "place_of_birth.country",
+        "birth_state": "place_of_birth.region",
+        "birth_city": "place_of_birth.locality",
+        "resident_address": "address.formatted",
+        "resident_country": "address.country",
+        "resident_state": "address.region",
+        "resident_city": "address.locality",
+        "resident_postal_code": "address.postal_code",
+        "resident_street": "address.street_address",
+        "resident_house_number": "address.house_number",
+    }
     # route /pid/getpid response fields per API version
     getpid_or_mdl_response_field = {
         "0.1": [
@@ -341,7 +363,7 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "org.iso.18013.5.reservation.1",
-        },
+        }
     }
 
     auth_method_supported_credencials = {
@@ -356,7 +378,6 @@ class ConfService:
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",
-            "eu.europa.ec.eudi.mdl_jwt_vc_json",
             "eu.europa.ec.eudi.mdl_mdoc",
             "eu.europa.ec.eudi.pid_jwt_vc_json",
             "eu.europa.ec.eudi.pid_mdoc",
@@ -368,13 +389,14 @@ class ConfService:
             "eu.europa.ec.eudi.hiid_mdoc",
             "eu.europa.ec.eudi.tax_mdoc",
             "eu.europa.ec.eudi.msisdn_mdoc",
+            "eu.europa.ec.eudi.ehic_mdoc",
         ],
     }
 
     # eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
     dynamic_presentation_url = os.getenv(
         "DYNAMIC_PRESENTATION_URL",
-        "https://dev.verifier-backend.eudiw.dev/ui/presentations/",
+        "https://verifier-backend.eudiw.dev/ui/presentations/",
     )
     dynamic_issuing = {
         "eu.europa.ec.eudi.pseudonym_over18_mdoc": {

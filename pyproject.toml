@@ -35,7 +35,7 @@ gunicorn = "^23.0.0"
 pymdoccbor = { git = "https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git" }
 idpyoidc = { git = "https://github.com/eu-digital-identity-wallet/idpy-oidc.git" }
 openid4v = { git = "https://github.com/eu-digital-identity-wallet/openid4v.git" }
-sd-jwt = { git = "https://github.com/openwallet-foundation-labs/sd-jwt-python.git", rev = "9181a0a4514b7de2cc30a84d320b509e9fc5cb59" }
+sd-jwt = { git = "https://github.com/openwallet-foundation-labs/sd-jwt-python.git", rev = "v0.10.4-1" }
 fedservice = { git = "https://github.com/rohe/fedservice.git" }
 idpysdjwt = { git = "https://github.com/rohe/idpy-sdjwt.git" }
 google-cloud-logging = "^3.11.2"

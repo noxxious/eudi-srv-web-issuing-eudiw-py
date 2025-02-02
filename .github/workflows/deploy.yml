@@ -104,6 +104,7 @@ jobs:
           secrets: |-
             FLASK_SECRET=${{ secrets.ISSUER_FLASK_SECRET }}
             EIDASNODE_LIGHTTOKEN_SECRET=${{ secrets.EIDAS_LIGHT_TOKEN_SECRET }}
+            REVOCATION_API_KEY=${{ secrets.REVOCATION_API_KEY_SECRET }}
           env_vars_update_strategy: overwrite
           env_vars: |-
             USE_GCP_LOGGER=1
@@ -112,6 +113,10 @@ jobs:
             DYNAMIC_PRESENTATION_URL=${{ vars.DYNAMIC_PRESENTATION_URL }}
             SERVICE_URL=${{ vars.SERVICE_URL }}
             ENABLED_COUNTRIES=${{ vars.ENABLED_COUNTRIES }}
+            PID_ISSUING_AUTHORITY= ${{ vars.PID_ISSUING_AUTHORITY }}
+            PID_ORG_ID=${{ vars.PID_ORG_ID}}
+            MDL_ISSUING_AUTHORITY=${{ vars.MDL_ISSUING_AUTHORITY }}
+            QEAA_ISSUING_AUTHORITY=${{ vars.QEAA_ISSUING_AUTHORITY }}
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
