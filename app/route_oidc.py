@@ -30,6 +30,7 @@ import sys
 import uuid
 import urllib.parse
 import segno
+import traceback
 
 from flask import (
     Blueprint,
@@ -40,6 +41,7 @@ from flask import (
     current_app,
     redirect,
     render_template,
+    url_for,
 )
 from flask.helpers import make_response
 import os
@@ -53,8 +55,10 @@ import sys
 from typing import Union
 from urllib.parse import urlparse
 
+from idpyoidc.message.oidc import AccessTokenRequest
+from idpyoidc.server.exception import FailedAuthentication, ClientAuthenticationError
+from idpyoidc.server.oidc.token import Token
 
-from idpyoidc.server.exception import FailedAuthentication
 from app.misc import auth_error_redirect, authentication_error_redirect, scope2details
 
 from datetime import datetime, timedelta
@@ -63,6 +67,7 @@ from datetime import datetime, timedelta
 import requests
 
 from .app_config.config_service import ConfService as cfgservice
+from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
 from . import oidc_metadata, openid_metadata, oauth_metadata
 
