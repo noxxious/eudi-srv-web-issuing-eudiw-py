@@ -30,7 +30,7 @@ def pid_test_case_form():
     """
     session["route"] = "/testcase/lt/pid/pid_test_case_form"
     session["version"] = "0.5"
-    session["country"] = "LT"
+    session["country"] = "LT-PID"
     logger = cfgserv.app_logger.getChild("testcases.lt.pid")
 
     # if GET
@@ -89,7 +89,7 @@ def pid_test_case_form():
     )
     pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
 
-    user_id = "LT." + user_id
+    user_id = f"{session["country"]}LT.{user_id}"
 
     logger.info(
         {
