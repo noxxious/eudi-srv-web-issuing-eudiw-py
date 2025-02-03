@@ -109,7 +109,7 @@ def mdl_test_case_form():
 
     mdl_data["mDL"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
     mdl_data["mDL"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
-    mdl_data["mDL"].update({"issuing_country": session["country"]}),
+    mdl_data["mDL"].update({"issuing_country": "LT"}),
     mdl_data["mDL"].update({"issuing_authority": doctype_config["issuing_authority"]})
     mdl_data["mDL"].update(
         {

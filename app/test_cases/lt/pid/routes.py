@@ -78,7 +78,7 @@ def pid_test_case_form():
 
     pid_data["PID"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
     pid_data["PID"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
-    pid_data["PID"].update({"issuing_country": session["country"]}),
+    pid_data["PID"].update({"issuing_country": "LT"}),
     pid_data["PID"].update({"issuing_authority": doctype_config["issuing_authority"]})
     pid_data["PID"].update(
         {

@@ -616,6 +616,7 @@ def token_service():
 
 @oidc.route("/token", methods=["POST"])
 def token():
+    logger = cfgservice.app_logger.getChild("token")
 
     req_args = dict([(k, v) for k, v in request.form.items()])
 
@@ -625,7 +626,7 @@ def token():
 
         session_id = getSessionId_authCode(req_args["code"])
 
-        cfgservice.app_logger.info(
+        logger.info(
             ", Session ID: "
             + session_id
             + ", "
@@ -635,7 +636,7 @@ def token():
 
         response = service_endpoint(current_app.server.get_endpoint("token"))
 
-        cfgservice.app_logger.info(
+        logger.info(
             ", Session ID: "
             + session_id
             + ", "
@@ -681,7 +682,7 @@ def token():
 
         session_id = getSessionId_authCode(preauth_code)
 
-        cfgservice.app_logger.info(
+        logger.info(
             ", Session ID: "
             + session_id
             + ", "
@@ -714,11 +715,11 @@ def token():
             return make_response("invalid_request", 400)
 
         # response = response.json()
-        cfgservice.app_logger.info("Token response: " + str(response.json()))
+        logger.info("Token response: " + str(response.json()))
 
         transaction_codes.pop(code)
 
-        cfgservice.app_logger.info(
+        logger.info(
             ", Session ID: "
             + session_id
             + ", "
@@ -738,7 +739,7 @@ def token():
 
     else:
         response = service_endpoint(current_app.server.get_endpoint("token"))
-        cfgservice.app_logger.info(
+        logger.info(
             "Token response: " + str(json.loads(response.get_data()))
         )
 
@@ -767,10 +768,10 @@ def par_endpoint():
 
 @oidc.route("/pushed_authorizationv2", methods=["POST"])
 def par_endpointv2():
-
+    logger = cfgservice.app_logger.getChild("pushed_authorizationV2")
     session_id = str(uuid.uuid4())
 
-    cfgservice.app_logger.info(
+    logger.info(
         ", Session ID: "
         + session_id
         + ", "
@@ -784,7 +785,7 @@ def par_endpointv2():
 
         client_id = request.form["client_id"]
     except:
-        cfgservice.app_logger.error("PAR: client_id or redirect_uri not found")
+        logger.error("PAR: client_id or redirect_uri not found")
         if redirect_uri:
             return auth_error_redirect(
                 redirect_uri, "invalid_request", "invalid parameters"
@@ -800,7 +801,7 @@ def par_endpointv2():
 
     response = service_endpoint(current_app.server.get_endpoint("pushed_authorization"))
 
-    cfgservice.app_logger.info(
+    logger.info(
         ", Session ID: "
         + session_id
         + ", "
@@ -1221,7 +1222,7 @@ IGNORE = ["cookie", "user-agent"]
 
 def service_endpoint(endpoint):
     # _log = current_app.logger
-    logger = cfgservice.app_logger.getChild("service_endpoint")
+    logger = cfgservice.app_logger.getChild("service_endpoint").getChild(endpoint.name)
     logger.info('At the "{}" endpoint'.format(endpoint.name))
 
     http_info = {
@@ -1263,7 +1264,7 @@ def service_endpoint(endpoint):
             return response
         except Exception as err:
             message = traceback.format_exception(*sys.exc_info())
-            cfgservice.app_logger.error(message)
+            logger.error(message)
             err_msg = ResponseMessage(
                 error="invalid_request", error_description=str(err)
             )
