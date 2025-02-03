@@ -532,6 +532,7 @@ class ConfService:
     # LOGS
 
     if os.getenv("USE_GCP_LOGGER") == "1":
+        logging.handlers.clear()
         from adapters.out.logging.google_cloud import get_logger
 
         app_logger = get_logger("app_logger")
