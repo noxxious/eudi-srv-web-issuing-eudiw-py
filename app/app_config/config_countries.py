@@ -216,7 +216,7 @@ class ConfCountries:
             "name": "Lithuania mDL Test Cases",
             "connection_type": "testcase",
             "template": "dynamic/mdl-test-case-form.html",
-            "testcase_redirect_url": urljoin(
+            "testcase_redirect_uri": urljoin(
                 cfgserv.service_url, "testcase/lt/mdl_test_case_form"
             ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/MDL-DS-0001_LT_DEV.key.pem",
@@ -232,7 +232,7 @@ class ConfCountries:
             "name": "Lithuania PID Test Cases",
             "connection_type": "testcase",
             "template": "dynamic/pid-test-case-form.html",
-            "testcase_redirect_url": urljoin(
+            "testcase_redirect_uri": urljoin(
                 cfgserv.service_url, "testcase/lt/mdl/pid_test_case_form"
             ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LT_DEV.key.pem",
