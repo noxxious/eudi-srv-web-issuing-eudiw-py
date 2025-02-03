@@ -13,7 +13,7 @@ def add_number_to_image(image_path, number):
         draw = ImageDraw.Draw(img)
 
         # Load the Arial font
-        font_path = Path(__file__).parent / "static" / "arial.ttf"
+        font_path = Path(__file__).parent / "arial.ttf"
         try:
             font = ImageFont.truetype(font_path, size=150)
         except IOError:
