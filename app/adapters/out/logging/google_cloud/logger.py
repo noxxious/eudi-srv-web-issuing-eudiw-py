@@ -4,6 +4,7 @@ from .handler import GoogleCloudHandler
 def get_logger(name):
     logger = logging.getLogger(name)
 
+    logger.handlers.clear()
     if not logger.handlers:
         gcp_handler = GoogleCloudHandler()
         gcp_handler.setLevel(logging.DEBUG)

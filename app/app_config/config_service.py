@@ -531,8 +531,8 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
-    if os.getenv("USE_GCP_LOGGING") == "1":
-        from ..adapters.out.logging.google_cloud import get_logger
+    if os.getenv("USE_GCP_LOGGER") == "1":
+        from adapters.out.logging.google_cloud import get_logger
 
         app_logger = get_logger("app_logger")
     elif os.getenv("USE_FILE_LOGGER") == "1":
