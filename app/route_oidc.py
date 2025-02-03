@@ -25,12 +25,9 @@ This route_oidc.py file is the blueprint for the route /oidc of the PID Issuer W
 import base64
 import hashlib
 import io
-import random
 import re
 import sys
-import time
 import uuid
-import threading
 import urllib.parse
 import segno
 
@@ -43,26 +40,21 @@ from flask import (
     current_app,
     redirect,
     render_template,
-    url_for,
 )
-from flask.helpers import make_response, send_from_directory
+from flask.helpers import make_response
 import os
+import werkzeug
 
 from flask_cors import CORS
 from idpyoidc.message.oidc import AuthorizationRequest
 from idpyoidc.message.oauth2 import ResponseMessage
 import json
 import sys
-import traceback
 from typing import Union
 from urllib.parse import urlparse
 
-from cryptojwt import as_unicode
-from idpyoidc.message.oidc import AccessTokenRequest
-import werkzeug
 
-from idpyoidc.server.exception import FailedAuthentication, ClientAuthenticationError
-from idpyoidc.server.oidc.token import Token
+from idpyoidc.server.exception import FailedAuthentication
 from app.misc import auth_error_redirect, authentication_error_redirect, scope2details
 
 from datetime import datetime, timedelta
@@ -71,7 +63,6 @@ from datetime import datetime, timedelta
 import requests
 
 from .app_config.config_service import ConfService as cfgservice
-from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
 from . import oidc_metadata, openid_metadata, oauth_metadata
 
@@ -251,7 +242,7 @@ def well_known(service):
             resp.headers[key] = value
 
         return resp
-    elif service == 'oauth-authorization-server':
+    elif service == "oauth-authorization-server":
         info = {
             "response": oauth_metadata,
             "http_headers": [
@@ -268,7 +259,7 @@ def well_known(service):
             resp.headers[key] = value
 
         return resp
-    
+
     elif service == "openid-configuration":
         # _endpoint = current_app.server.get_endpoint("provider_config")
         info = {
@@ -340,14 +331,14 @@ def authorizationv2(
     )
 
     # return service_endpoint(current_app.server.get_endpoint("authorization"))
-    url = (
-        urllib.parse.urljoin(cfgservice.service_url, 
+    url = urllib.parse.urljoin(
+        cfgservice.service_url,
         "authorization?redirect_uri="
         + redirect_uri
         + "&response_type="
         + response_type
         + "&client_id="
-        + client_id)
+        + client_id,
     )
 
     if scope:
@@ -476,8 +467,8 @@ def authorizationV3():
     if "scope" not in par_args:
         par_args["scope"] = "openid"
 
-    url = (
-        urllib.parse.urljoin(cfgservice.service_url,
+    url = urllib.parse.urljoin(
+        cfgservice.service_url,
         "authorization?redirect_uri="
         + par_args["redirect_uri"]
         + "&response_type="
@@ -487,7 +478,7 @@ def authorizationV3():
         + "&client_id="
         + par_args["client_id"]
         + "&request_uri="
-        + request_uri)
+        + request_uri,
     )
 
     payload = {}
@@ -826,6 +817,7 @@ def par_endpointv2():
 
 @oidc.route("/credential", methods=["POST"])
 def credential():
+    logger = cfgservice.app_logger.getChild("credential")
 
     headers = dict(request.headers)
     payload = json.loads(request.data)
@@ -836,23 +828,24 @@ def credential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Credential Request, Payload: "
-        + str(payload)
+    logger.info(
+        {
+            "message": f"session ID: {session_id}, Credential Request",
+            "session_id": session_id,
+            "session": session,
+            "request": payload,
+            "headers": headers,
+        }
     )
-
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
     if isinstance(_response, Response):
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Credential response, Payload: "
-            + str(json.loads(_response.get_data()))
+        logger.info(
+            {
+                "message": f"session ID: {session_id}, Credential Response",
+                "session_id": session_id,
+                "response": json.loads(_response.get_data()),
+            }
         )
         return _response
 
@@ -873,30 +866,33 @@ def credential():
                 }
             }
         )
-
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Credential response, Payload: "
-            + str(_response)
+        _response = jsonify(_response)
+        logger.info(
+            {
+                "message": f"session ID: {session_id}, Credential Response",
+                "session_id": session_id,
+                "response": _response,
+            }
         )
 
-        return make_response(jsonify(_response), 202)
-
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Credential response, Payload: "
-        + str(_response)
+        return make_response(_response, 202)
+    logger.info(
+        {
+            "message": f"session ID: {session_id}, Credential Response",
+            "session_id": session_id,
+            "session": session,
+            "response": _response,
+        }
     )
+
     return _response
 
 
 @oidc.route("/batch_credential", methods=["POST"])
 def batchCredential():
 
+    logger = cfgservice.app_logger.getChild("batch_credential")
+
     headers = dict(request.headers)
     payload = json.loads(request.data)
 
@@ -906,23 +902,25 @@ def batchCredential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Batch Credential Request, Payload: "
-        + str(payload)
+    logger.info(
+        {
+            "message": f"session ID: {session_id}, Batch Credential Request",
+            "session_id": session_id,
+            "session": session,
+            "request": payload,
+            "headers": headers,
+        }
     )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
     if isinstance(_response, Response):
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Batch Credential response, Payload: "
-            + str(json.loads(_response.get_data()))
+        logger.info(
+            {
+                "message": f"session ID: {session_id}, Batch Credential Response",
+                "session_id": session_id,
+                "response": json.loads(_response.get_data()),
+            }
         )
         return _response
 
@@ -944,21 +942,23 @@ def batchCredential():
             }
         )
 
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Batch credential response, Payload: "
-            + str(_response)
+        _response = jsonify(_response)
+        logger.info(
+            {
+                "message": f"session ID: {session_id}, Batch Credential Response",
+                "session_id": session_id,
+                "response": _response,
+            }
         )
-        return make_response(jsonify(_response), 202)
+        return make_response(_response, 202)
 
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Batch credential response, Payload: "
-        + str(_response)
+    logger.info(
+        {
+            "message": f"session ID: {session_id}, Batch Credential Response",
+            "session_id": session_id,
+            "session": session,
+            "response": _response,
+        }
     )
 
     return _response
@@ -1145,7 +1145,9 @@ def credentialOffer():
             else:
 
                 credential_offer = {
-                    "credential_issuer": urlparse(cfgservice.service_url)._replace(path="").geturl(),
+                    "credential_issuer": urlparse(cfgservice.service_url)
+                    ._replace(path="")
+                    .geturl(),
                     "credential_configuration_ids": credentials_id,
                     "grants": {"authorization_code": {}},
                 }
@@ -1179,7 +1181,9 @@ def credentialOffer():
                     out.getvalue()
                 ).decode("utf-8")
 
-                wallet_url = urllib.parse.urljoin(cfgservice.wallet_test_url, "credential_offer")
+                wallet_url = urllib.parse.urljoin(
+                    cfgservice.wallet_test_url, "credential_offer"
+                )
 
                 return render_template(
                     "openid/credential_offer_qr_code.html",
@@ -1191,7 +1195,9 @@ def credentialOffer():
                 )
 
     else:
-        return redirect(urllib.parse.urljoin(cfgservice.service_url, "credential_offer_choice"))
+        return redirect(
+            urllib.parse.urljoin(cfgservice.service_url, "credential_offer_choice")
+        )
 
 
 """ @oidc.route("/testgetauth", methods=["GET"])
@@ -1229,7 +1235,9 @@ def service_endpoint(endpoint):
             req_args = request.json
             req_args["access_token"] = accessToken
             req_args["oidc_config"] = cfgoidc
-            req_args["aud"] = urlparse(cfgservice.service_url)._replace(path="").geturl()
+            req_args["aud"] = (
+                urlparse(cfgservice.service_url)._replace(path="").geturl()
+            )
             args = endpoint.process_request(req_args)
             if "response_args" in args:
                 if "error" in args["response_args"]:

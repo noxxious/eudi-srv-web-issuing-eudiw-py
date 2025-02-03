@@ -217,7 +217,7 @@ class ConfCountries:
             "connection_type": "testcase",
             "template": "dynamic/mdl-test-case-form.html",
             "testcase_redirect_uri": urljoin(
-                cfgserv.service_url, "testcase/lt/mdl_test_case_form"
+                cfgserv.service_url, "testcase/lt/mdl/mdl_test_case_form"
             ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/MDL-DS-0001_LT_DEV.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes

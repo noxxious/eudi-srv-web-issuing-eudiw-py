@@ -87,9 +87,19 @@ def pid_test_case_form():
     )
     pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
 
+    user_id = ("LT." + user_id,)
+
+    cfgserv.app_logger.info(
+        {
+            "message": "Issued PID attestation",
+            "attestation": pid_data,
+            "user_id": user_id,
+        }
+    )
+
     return render_template(
         "dynamic/form_authorize.html",
         presentation_data=pid_data,
-        user_id="LT." + user_id,
+        user_id=user_id,
         redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet"),
     )

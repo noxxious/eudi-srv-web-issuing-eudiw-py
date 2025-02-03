@@ -22,20 +22,21 @@ blueprint = Blueprint("test_lt_mdl", __name__, url_prefix="/testcase/lt/mdl/")
 CORS(blueprint)  # enable CORS on the blue print
 
 app = Flask(__name__)
-# app.config["SECRET_KEY"] = flask_secret_key
-# app.config["dynamic"] = {}
 
 from app.data_management import form_dynamic_data
 
 
 @blueprint.route("/mdl_test_case_form", methods=["GET", "POST"])
 def mdl_test_case_form():
-    """Form page for test cases.
+    """
+    Form page for test cases.
     Form page where the user can select mDL test case.
     """
     session["route"] = "/testcase/lt/mdl/mdl_test_case_form"
     session["version"] = "0.5"
     session["country"] = "LT"
+    logger = cfgserv.app_logger.getChild("credential")
+
     # if GET
     if request.method == "GET":
         # print("/pid/form GET: " + str(request.args))
@@ -119,9 +120,19 @@ def mdl_test_case_form():
     )
     mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
 
+    user_id = ("LT." + user_id,)
+
+    logger.info(
+        {
+            "message": "Issued mDL attestation",
+            "attestation": mdl_data,
+            "user_id": user_id,
+        }
+    )
+
     return render_template(
         "dynamic/form_authorize.html",
         presentation_data=mdl_data,
-        user_id="LT." + user_id,
+        user_id=user_id,
         redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet"),
     )
