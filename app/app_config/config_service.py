@@ -51,13 +51,13 @@ class ConfService:
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
     # Countries to enable from config_countries. Empty or None -> enables all configured countries
-    # Configure by passing comma separated keys as environment variables
+    # Configure by passing semicolon separated keys as environment variables
     enabled_countries: list[str] = [
         v.strip()
         for v in os.getenv("ENABLED_COUNTRIES", "")
         .replace("'", "")
         .replace('"', "")
-        .split(",")
+        .split(";")
     ]
 
     # ------------------------------------------------------------------------------------------------
