@@ -240,7 +240,7 @@ def create_app(test_config=None):
         ],
         base_path=dir_path,
     )
-
+    config.logger = cfgserv.app_logger.getChild("oidc")
     app.srv_config = config.op
 
     server = Server(config.op, cwd=dir_path)

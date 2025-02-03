@@ -112,7 +112,7 @@ jobs:
             EIDAS_NODE_URL=${{ vars.EIDAS_NODE_URL }}
             DYNAMIC_PRESENTATION_URL=${{ vars.DYNAMIC_PRESENTATION_URL }}
             SERVICE_URL=${{ vars.SERVICE_URL }}
-            ENABLED_COUNTRIES=${{ vars.ENABLED_COUNTRIES }}
+            ENABLED_COUNTRIES='${{ vars.ENABLED_COUNTRIES }}'
             PID_ISSUING_AUTHORITY= ${{ vars.PID_ISSUING_AUTHORITY }}
             PID_ORG_ID=${{ vars.PID_ORG_ID}}
             MDL_ISSUING_AUTHORITY=${{ vars.MDL_ISSUING_AUTHORITY }}

@@ -215,8 +215,10 @@ class ConfCountries:
         "LT-mDL": {
             "name": "Lithuania mDL Test Cases",
             "connection_type": "testcase",
-            "template": "dynamic/mdl-test-case-form.html", 
-            "testcase_redirect_url": urljoin(cfgserv.service_url, "testcase/lt/mdl_test_case_form"),
+            "template": "dynamic/mdl-test-case-form.html",
+            "testcase_redirect_url": urljoin(
+                cfgserv.service_url, "testcase/lt/mdl_test_case_form"
+            ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/MDL-DS-0001_LT_DEV.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/MDL-DS-0001_LT_DEV.cert.der",
@@ -229,8 +231,10 @@ class ConfCountries:
         "LT-PID": {
             "name": "Lithuania PID Test Cases",
             "connection_type": "testcase",
-            "template": "dynamic/pid-test-case-form.html", 
-            "testcase_redirect_url": urljoin(cfgserv.service_url, "testcase/lt/mdl/pid_test_case_form"),
+            "template": "dynamic/pid-test-case-form.html",
+            "testcase_redirect_url": urljoin(
+                cfgserv.service_url, "testcase/lt/mdl/pid_test_case_form"
+            ),
             "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LT_DEV.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LT_DEV.cert.der",

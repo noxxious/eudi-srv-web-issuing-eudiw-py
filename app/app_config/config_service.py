@@ -37,10 +37,10 @@ class ConfService:
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
     service_url = os.getenv("SERVICE_URL", "https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
-    #service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
+    # service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
     wallet_test_url = os.getenv(
-        "WALLET_TEST_URL",  "https://dev.tester.issuer.eudiw.dev/"
+        "WALLET_TEST_URL", "https://dev.tester.issuer.eudiw.dev/"
     )
 
     revocation_service_url = os.getenv(
@@ -54,14 +54,15 @@ class ConfService:
     # Configure by passing comma separated keys as environment variables
     enabled_countries: list[str] = [
         v.strip()
-        for v in os.getenv("ENABLED_COUNTRIES", "").split(",")
+        for v in os.getenv("ENABLED_COUNTRIES", "")
+        .replace("'", "")
+        .replace('"', "")
+        .split(",")
     ]
 
     # ------------------------------------------------------------------------------------------------
     # eIDAS Node base href (used in lightrequest)
-    eidasnode_url = os.getenv(
-        "EIDAS_NODE_URL", urljoin(service_url, "/EidasNode/")
-    )
+    eidasnode_url = os.getenv("EIDAS_NODE_URL", urljoin(service_url, "/EidasNode/"))
 
     # Number of Tries for login in eidas node
     eidasnode_retry = 3
@@ -107,7 +108,9 @@ class ConfService:
     pid_issuing_authority = os.getenv("PID_ISSUING_AUTHORITY", "Test PID issuer")
 
     # PID Organization ID
-    pid_organization_id = os.getenv("PID_ORG_ID", "EUDI Wallet Reference Implementation")
+    pid_organization_id = os.getenv(
+        "PID_ORG_ID", "EUDI Wallet Reference Implementation"
+    )
 
     # mDL namespace
     mdl_namespace = "org.iso.18013.5.1"
@@ -288,82 +291,82 @@ class ConfService:
             "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.pseudonym.age_over_18.1",
         },
         "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint",
         },
         "eu.europa.ec.eudi.loyalty.1": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.loyalty.1",
         },
         "teste": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": pid_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "teste",
         },
         "org.iso.23220.2.photoid.1": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "org.iso.23220.photoid.1",
         },
         "eu.europa.ec.eudi.por.1": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.por.1",
         },
         "eu.europa.ec.eudi.iban.1": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.iban.1",
             "credential_type": "IBAN",
         },
         "eu.europa.ec.eudi.hiid.1": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.hiid.1",
         },
         "eu.europa.ec.eudi.tax.1": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.tax.1",
             "credential_type": "Tax Number",
         },
         "eu.europa.ec.eudi.msisdn.1": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "eu.europa.ec.eudi.msisdn.1",
             "credential_type": "MSISDN",
         },
         "org.iso.18013.5.1.reservation": {
-            "issuing_authority": qeaa_issuing_authority,,
+            "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,,
+            "organization_name": qeaa_issuing_authority,
             "namespace": "org.iso.18013.5.reservation.1",
-        }
+        },
     }
 
     auth_method_supported_credencials = {
