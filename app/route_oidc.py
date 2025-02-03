@@ -1221,7 +1221,8 @@ IGNORE = ["cookie", "user-agent"]
 
 def service_endpoint(endpoint):
     # _log = current_app.logger
-    cfgservice.app_logger.info('At the "{}" endpoint'.format(endpoint.name))
+    logger = cfgservice.app_logger.getChild("service_endpoint")
+    logger.info('At the "{}" endpoint'.format(endpoint.name))
 
     http_info = {
         "headers": {
@@ -1232,7 +1233,7 @@ def service_endpoint(endpoint):
         # name is not unique
         "cookie": [{"name": k, "value": v} for k, v in request.cookies.items()],
     }
-    cfgservice.app_logger.info(f"http_info: {http_info}")
+    logger.info(f"http_info: {http_info}")
 
     if endpoint.name == "credential":
         try:
@@ -1246,6 +1247,7 @@ def service_endpoint(endpoint):
             args = endpoint.process_request(req_args)
             if "response_args" in args:
                 if "error" in args["response_args"]:
+                    logger.error({"message": "error in credential response args", "args":args})
                     return (
                         jsonify(args["response_args"]),
                         400,
@@ -1254,7 +1256,7 @@ def service_endpoint(endpoint):
                 response = args["response_args"]
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
-                    cfgservice.app_logger.error("Error response: {}".format(args))
+                    logger.error("Error response in credential: {}".format(args))
                     response = make_response(args.to_json(), 400)
                 else:
                     response = do_response(endpoint, args, **args)
@@ -1276,11 +1278,11 @@ def service_endpoint(endpoint):
             _resp = endpoint.process_request(req_args)
 
             if isinstance(_resp, ResponseMessage) and "error" in _resp:
-                cfgservice.app_logger.error("Error response: {}".format(_resp))
+                logger.error("Error response in notification: {}".format(_resp))
                 _resp = make_response(_resp.to_json(), 400)
 
         except Exception as err:
-            cfgservice.app_logger.error(err)
+            logger.error({"message": "Generic error in service endpoint", "err": err})
             return make_response(
                 json.dumps({"error": "invalid_request", "error_description": str(err)}),
                 400,
@@ -1325,7 +1327,7 @@ def service_endpoint(endpoint):
                 args["client_id"] = args["client_id"].split(".")[0]
             req_args = endpoint.parse_request(args, http_info=http_info)
         except ClientAuthenticationError as err:
-            cfgservice.app_logger.error(err)
+            logger.error(err)
             return make_response(
                 json.dumps(
                     {"error": "unauthorized_client", "error_description": str(err)}
@@ -1333,7 +1335,7 @@ def service_endpoint(endpoint):
                 401,
             )
         except Exception as err:
-            cfgservice.app_logger.error(err)
+            logger.error(err)
             return make_response(
                 json.dumps({"error": "invalid_request", "error_description": str(err)}),
                 400,
@@ -1349,20 +1351,20 @@ def service_endpoint(endpoint):
         try:
             req_args = endpoint.parse_request(req_args, http_info=http_info)
         except Exception as err:
-            cfgservice.app_logger.error(err)
+            logger.error(err)
             err_msg = ResponseMessage(
                 error="invalid_request", error_description=str(err)
             )
             return make_response(err_msg.to_json(), 400)
 
     if isinstance(req_args, ResponseMessage) and "error" in req_args:
-        cfgservice.app_logger.error("Error response: {}".format(req_args))
+        logger.error("Error response: {}".format(req_args))
         _resp = make_response(req_args.to_json(), 400)
         if request.method == "POST":
             _resp.headers["Content-type"] = "application/json"
         return _resp
     try:
-        cfgservice.app_logger.error("request: {}".format(req_args))
+        logger.error("request: {}".format(req_args))
         if isinstance(endpoint, Token):
             args = endpoint.process_request(
                 AccessTokenRequest(**req_args), http_info=http_info
@@ -1373,7 +1375,7 @@ def service_endpoint(endpoint):
             )
     except Exception as err:
         message = traceback.format_exception(*sys.exc_info())
-        cfgservice.app_logger.error(message)
+        logger.error(message)
         err_msg = ResponseMessage(error="invalid_request", error_description=str(err))
         return make_response(err_msg.to_json(), 400)
 
