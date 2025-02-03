@@ -569,7 +569,7 @@ def dynamic_R2():
     session["version"] = cfgserv.current_version
     session["route"] = "/dynamic/form_R2"
 
-    country_config = cfgcountries.configured_countries["country"]
+    country_config = cfgcountries.configured_countries[country]
 
     data = dynamic_R2_data_collect(
         country=country, user_id=user_id, country_config=country_config,
