@@ -120,7 +120,7 @@ def mdl_test_case_form():
     )
     mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
 
-    user_id = f"{session["country"]}LT.{user_id}"
+    user_id = f"{session["country"]}.{user_id}"
 
     logger.info(
         {
