@@ -30,7 +30,7 @@ import json
 import base64
 from uuid import uuid4
 from PIL import Image
-from flask import Blueprint, Flask, redirect, render_template, request, session
+from flask import Blueprint, Flask, redirect, render_template, request, session, jsonify
 from flask_api import status
 from flask_cors import CORS
 import requests
@@ -587,7 +587,7 @@ def dynamic_R2():
         country_config=country_config,
     )
 
-    return credential_response
+    return jsonify(credential_response), 200
 
 
 def dynamic_R2_data_collect(country, user_id, country_config):
@@ -615,7 +615,7 @@ def dynamic_R2_data_collect(country, user_id, country_config):
             return {"error": "error", "error_description": "Data not found"}
 
         session["version"] = cfgserv.current_version
-        session["country"] = data["issuing_country"]
+        session["country"] = country
 
         return data
 
@@ -762,10 +762,7 @@ def credentialCreation(credential_request, data, country, country_config):
         if country == "FC":
             form_data = data
 
-        elif country == "LT":
-            form_data = data
-
-        elif country == "LT-PID":
+        elif country_config["connection_type"] == "testcase":
             form_data = data
 
         elif country == "sample":
