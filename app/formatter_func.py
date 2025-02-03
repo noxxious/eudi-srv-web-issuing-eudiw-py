@@ -30,18 +30,11 @@ import datetime
 import hashlib
 import requests
 from sd_jwt.common import SDObj
-from jsonschema import ValidationError, validate
 from sd_jwt import __version__
-from sd_jwt.utils.demo_utils import (
-    get_jwk,
-    load_yaml_settings,
-)
+from sd_jwt.utils.demo_utils import get_jwk
 from sd_jwt.issuer import SDJWTIssuer
-from sd_jwt.holder import SDJWTHolder
-from sd_jwt.verifier import SDJWTVerifier
-from sd_jwt.utils.yaml_specification import load_yaml_specification
-from uuid import uuid4
 import jwt
+from urllib.parse import urlparse
 
 from misc import doctype2vct
 from app_config.config_countries import ConfCountries as cfgcountries
@@ -248,7 +241,7 @@ def sdjwtFormatter(PID, country):
             
 
     claims = {
-        "iss": cfgservice.service_url[:-1],
+        "iss": urlparse(cfgservice.service_url)._replace(path="").geturl(),
         #"iss": "https://issuer.eudiw.dev",
         #"jti": jti,
         "iat": iat,

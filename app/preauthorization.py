@@ -30,7 +30,6 @@ from flask import (
     Blueprint,
     current_app,
     make_response,
-    redirect,
     render_template,
     request,
     session,
@@ -39,8 +38,7 @@ from flask_cors import CORS
 import requests
 import urllib.parse
 from datetime import date, datetime, timedelta
-from redirect_func import url_get
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import segno
 
@@ -324,7 +322,7 @@ def generate_offer(data):
     )
 
     credential_offer = {
-        "credential_issuer": cfgservice.service_url[:-1],
+        "credential_issuer": urlparse(cfgservice.service_url)._replace(path="").geturl(),
         "credential_configuration_ids": session["credentials_id"],
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
@@ -422,7 +420,7 @@ def credentialOfferReq2():
     )
 
     credential_offer = {
-        "credential_issuer": cfgservice.service_url[:-1],
+        "credential_issuer": urlparse(cfgservice.service_url)._replace(path="").geturl(),
         "credential_configuration_ids": credential_ids,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {

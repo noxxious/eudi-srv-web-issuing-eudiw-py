@@ -1145,7 +1145,7 @@ def credentialOffer():
             else:
 
                 credential_offer = {
-                    "credential_issuer": cfgservice.service_url[:-1],
+                    "credential_issuer": urlparse(cfgservice.service_url)._replace(path="").geturl(),
                     "credential_configuration_ids": credentials_id,
                     "grants": {"authorization_code": {}},
                 }
@@ -1229,7 +1229,7 @@ def service_endpoint(endpoint):
             req_args = request.json
             req_args["access_token"] = accessToken
             req_args["oidc_config"] = cfgoidc
-            req_args["aud"] = cfgservice.service_url[:-1]
+            req_args["aud"] = urlparse(cfgservice.service_url)._replace(path="").geturl()
             args = endpoint.process_request(req_args)
             if "response_args" in args:
                 if "error" in args["response_args"]:
