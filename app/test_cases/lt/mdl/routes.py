@@ -65,15 +65,15 @@ def mdl_test_case_form():
 
     if mdl_data["mDL"]["portrait"] == "M":
         mdl_data["mDL"]["portrait"] = add_number_to_image(
-            Path(__file__).parent / "static" / "image.jpeg", test_case_number
+            Path(__file__).parent / "image.jpeg", test_case_number
         )
     else:
         mdl_data["mDL"]["portrait"] = add_number_to_image(
-            Path(__file__).parent / "static" / "image2.jpeg", test_case_number
+            Path(__file__).parent / "image2.jpeg", test_case_number
         )
 
     # add signature field (depending on test case number either to signature_usual_mark or usual_mark field
-    signature_path = Path(__file__).parent / "static" / "signature.jpg"
+    signature_path = Path(__file__).parent / "signature.jpg"
 
     if test_case_number > 8:
         mdl_data["mDL"].update({"usual_mark": convert_image_to_base64(signature_path)})

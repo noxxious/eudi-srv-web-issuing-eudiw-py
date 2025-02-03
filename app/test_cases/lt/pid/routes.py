@@ -89,7 +89,7 @@ def pid_test_case_form():
     )
     pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
 
-    user_id = f"{session["country"]}LT.{user_id}"
+    user_id = f"{session["country"]}.{user_id}"
 
     logger.info(
         {
