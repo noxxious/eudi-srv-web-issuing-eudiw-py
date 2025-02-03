@@ -35,7 +35,7 @@ def mdl_test_case_form():
     session["route"] = "/testcase/lt/mdl/mdl_test_case_form"
     session["version"] = "0.5"
     session["country"] = "LT"
-    logger = cfgserv.app_logger.getChild("credential")
+    logger = cfgserv.app_logger.getChild("testcases.lt.mdl")
 
     # if GET
     if request.method == "GET":
@@ -120,7 +120,7 @@ def mdl_test_case_form():
     )
     mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
 
-    user_id = ("LT." + user_id,)
+    user_id = "LT." + user_id
 
     logger.info(
         {
