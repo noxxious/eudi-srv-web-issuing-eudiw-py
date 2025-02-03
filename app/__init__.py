@@ -24,6 +24,7 @@ This __init__.py serves double duty: it will contain the application factory, an
 
 import os
 import sys
+import logging
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -164,6 +165,8 @@ def create_app(test_config=None):
 
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
 
     @app.route("/", methods=["GET"])
     def initial_page():

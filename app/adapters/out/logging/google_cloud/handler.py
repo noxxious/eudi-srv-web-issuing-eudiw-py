@@ -1,15 +1,15 @@
 import json
-import logging
 import os
 import sys
-from logging import StreamHandler
+from google.cloud.logging_v2.handlers import StructuredLogHandler
+#from logging import StreamHandler
 
 from flask import request
 
 
-class GoogleCloudHandler(StreamHandler):
+class GoogleCloudHandler(StructuredLogHandler):
     def __init__(self):
-        StreamHandler.__init__(self)
+        super().__init__(self)
 
     def emit(self, record):
         msg = self.format(record)
@@ -26,6 +26,6 @@ class GoogleCloudHandler(StreamHandler):
                 f"projects/{project}/traces/{trace[0]}")
 
         # Complete a structured log entry.
-        entry = dict(severity=record.levelname, message=msg)
+        entry = dict(severity=record.levelname, message=msg, **global_log_fields)
         print(json.dumps(entry))
         sys.stdout.flush()
