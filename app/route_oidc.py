@@ -1369,8 +1369,7 @@ def service_endpoint(endpoint):
             {
                 "message": "Service Endpoint request",
                 "session_id": session["session_id"],
-                "session": session,
-                "request": req_args,
+                "request": req_args.to_json(),
             }
         )
 
