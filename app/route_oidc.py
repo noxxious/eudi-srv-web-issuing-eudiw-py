@@ -1368,7 +1368,7 @@ def service_endpoint(endpoint):
         logger.info(
             {
                 "message": "Service Endpoint request",
-                "session_id": session["session_id"],
+                "session": session,
                 "request": req_args.to_json(),
             }
         )
