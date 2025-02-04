@@ -1365,7 +1365,14 @@ def service_endpoint(endpoint):
             _resp.headers["Content-type"] = "application/json"
         return _resp
     try:
-        logger.error("request: {}".format(req_args))
+        logger.info(
+            "Service Endpoint request",
+            extra={
+                "session_id": session["session_id"],
+                "request": req_args
+            }
+        )
+
         if isinstance(endpoint, Token):
             args = endpoint.process_request(
                 AccessTokenRequest(**req_args), http_info=http_info
