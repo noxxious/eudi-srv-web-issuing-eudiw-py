@@ -1366,10 +1366,10 @@ def service_endpoint(endpoint):
         return _resp
     try:
         logger.info(
-            {
-                "message": "Service Endpoint request",
+            "Service Endpoint request",
+            extra={
                 "session": session,
-                "request": req_args.to_json(),
+                "request": req_args,
             }
         )
 
