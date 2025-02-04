@@ -1369,7 +1369,7 @@ def service_endpoint(endpoint):
             {
                 "message": "Service Endpoint request",
                 "session": session,
-                "request": req_args
+                "request": json.dumps(req_args)
             }
         )
 
