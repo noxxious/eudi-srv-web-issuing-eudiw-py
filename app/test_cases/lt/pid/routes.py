@@ -58,12 +58,12 @@ def pid_test_case_form():
 
     user_id = generate_unique_id()
 
-    if pid_data["mDL"]["portrait"] == "M":
-        pid_data["mDL"]["portrait"] = add_number_to_image(
+    if pid_data["PID"]["portrait"] == "M":
+        pid_data["PID"]["portrait"] = add_number_to_image(
             Path(__file__).parent.parent / "image.jpeg", int(test_case)
         )
     else:
-        pid_data["mDL"]["portrait"] = add_number_to_image(
+        pid_data["PID"]["portrait"] = add_number_to_image(
             Path(__file__).parent.parent / "image2.jpeg", int(test_case)
         )
 
