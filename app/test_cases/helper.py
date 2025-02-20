@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from app_config.config_service import ConfService as cfgserv
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
@@ -49,3 +51,8 @@ def add_number_to_image(image_path, number):
 def convert_image_to_base64(image_path):
     with open(image_path, "rb") as imagefile:
         return base64.b64encode(imagefile.read()).decode("utf-8")
+
+
+def get_birth_year(birthday_str):
+    birthday = datetime.strptime(birthday_str, "%Y-%m-%d")
+    return birthday.year

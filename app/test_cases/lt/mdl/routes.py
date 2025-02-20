@@ -53,41 +53,26 @@ def mdl_test_case_form():
 
     form_data = request.form.to_dict()
 
-    test_case_number = int(form_data.get("case", "1"))
-    test_case = str(test_case_number)
-
-    # this is needed because of signature_usual_mark and usual_mark field uncertainty between ISO and POTENTIAL UC4 Test event doc
-    if test_case_number > 8:
-        test_case = str(test_case_number - 8)
+    test_case = form_data.get("case", "1")
 
     mdl_data = test_cases.get(test_case, test_cases["default"])
     user_id = generate_unique_id()
 
     if mdl_data["mDL"]["portrait"] == "M":
         mdl_data["mDL"]["portrait"] = add_number_to_image(
-            Path(__file__).parent / "image.jpeg", test_case_number
+            Path(__file__).parent.parent / "image.jpeg", int(test_case)
         )
     else:
         mdl_data["mDL"]["portrait"] = add_number_to_image(
-            Path(__file__).parent / "image2.jpeg", test_case_number
+            Path(__file__).parent.parent / "image2.jpeg", int(test_case)
         )
 
-    # add signature field (depending on test case number either to signature_usual_mark or usual_mark field
-    signature_path = Path(__file__).parent / "signature.jpg"
+    mdl_data["mDL"].update({"signature_usual_mark": convert_image_to_base64(Path(__file__).parent / "signature.jpg")})
 
-    if test_case_number > 8:
-        mdl_data["mDL"].update({"usual_mark": convert_image_to_base64(signature_path)})
-    else:
-        mdl_data["mDL"].update(
-            {"signature_usual_mark": convert_image_to_base64(signature_path)}
-        )
-
-    mdl_data["mDL"].update(
-        {
+    mdl_data["mDL"].update({
             "issuing_country": session["country"],
             "issuing_authority": cfgserv.mdl_issuing_authority,
-        }
-    )
+        })
 
     form_dynamic_data[user_id] = mdl_data["mDL"].copy()
     form_dynamic_data[user_id].update(
@@ -107,8 +92,8 @@ def mdl_test_case_form():
         if "expiry_date" not in privilege:
             privilege["expiry_date"] = expiry.strftime("%Y-%m-%d")
 
-    mdl_data["mDL"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
-    mdl_data["mDL"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
+    mdl_data["mDL"].update({"issue_date": today.strftime("%Y-%m-%d")})
+    mdl_data["mDL"].update({"expiry_date": expiry.strftime("%Y-%m-%d")})
     mdl_data["mDL"].update({"issuing_country": "LT"}),
     mdl_data["mDL"].update({"issuing_authority": doctype_config["issuing_authority"]})
     mdl_data["mDL"].update(

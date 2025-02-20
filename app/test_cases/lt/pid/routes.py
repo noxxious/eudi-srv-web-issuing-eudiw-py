@@ -3,6 +3,8 @@ Test cases for Lithuanian PID issuer interop tests.
 """
 
 from datetime import datetime, date, timedelta
+from pathlib import Path
+
 from flask_cors import CORS
 from flask import Blueprint, Flask, render_template, request, session
 from flask_api import status
@@ -15,6 +17,7 @@ from misc import (
 )
 
 from .test_cases import test_cases
+from ...helper import get_birth_year, add_number_to_image
 
 blueprint = Blueprint("test_lt_pid", __name__, url_prefix="/testcase/lt/pid/")
 CORS(blueprint)  # enable CORS on the blue print
@@ -55,6 +58,15 @@ def pid_test_case_form():
 
     user_id = generate_unique_id()
 
+    if pid_data["mDL"]["portrait"] == "M":
+        pid_data["mDL"]["portrait"] = add_number_to_image(
+            Path(__file__).parent.parent / "image.jpeg", int(test_case)
+        )
+    else:
+        pid_data["mDL"]["portrait"] = add_number_to_image(
+            Path(__file__).parent.parent / "image2.jpeg", int(test_case)
+        )
+
     pid_data["PID"].update(
         {
             "issuing_country": session["country"],
@@ -76,17 +88,14 @@ def pid_test_case_form():
     today = date.today()
     expiry = today + timedelta(days=doctype_config["validity"])
 
-    pid_data["PID"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
-    pid_data["PID"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
+    pid_data["PID"].update({"issuance_date": today.strftime("%Y-%m-%d")})
+    pid_data["PID"].update({"expiry_date": expiry.strftime("%Y-%m-%d")})
     pid_data["PID"].update({"issuing_country": "LT"}),
     pid_data["PID"].update({"issuing_authority": doctype_config["issuing_authority"]})
-    pid_data["PID"].update(
-        {
-            "age_over_18": (
-                True if calculate_age(pid_data["PID"]["birth_date"]) >= 18 else False
-            )
-        }
-    )
+    pid_data["PID"].update({"age_in_years": calculate_age(pid_data["PID"]["birth_date"])})
+    pid_data["PID"].update({"age_over_18": (True if pid_data["PID"]["age_in_years"] >= 18 else False)})
+    pid_data["PID"].update({"age_birth_year": get_birth_year(pid_data["PID"]["birth_date"])})
+
     pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
 
     user_id = f"{session["country"]}.{user_id}"
