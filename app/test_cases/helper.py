@@ -17,7 +17,7 @@ def add_number_to_image(image_path, number):
         # Load the Arial font
         font_path = Path(__file__).parent / "arial.ttf"
         try:
-            font = ImageFont.truetype(font_path, size=150)
+            font = ImageFont.truetype(font_path, size=350)
         except IOError:
             logger.error(
                 "No suitable font found. Please ensure a font is bundled with the application."
