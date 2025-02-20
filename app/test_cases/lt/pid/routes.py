@@ -25,12 +25,11 @@ CORS(blueprint)  # enable CORS on the blue print
 app = Flask(__name__)
 from app.data_management import form_dynamic_data
 
-
+"""Form page for test cases.
+    Form page where the user can select PID test case.
+    """
 @blueprint.route("/pid_test_case_form", methods=["GET", "POST"])
 def pid_test_case_form():
-    """Form page for test cases.
-    Form page where the user can select mDL test case.
-    """
     session["route"] = "/testcase/lt/pid/pid_test_case_form"
     session["version"] = "0.5"
     session["country"] = "LT-PID"
@@ -58,12 +57,12 @@ def pid_test_case_form():
 
     user_id = generate_unique_id()
 
-    if pid_data["mDL"]["portrait"] == "M":
-        pid_data["mDL"]["portrait"] = add_number_to_image(
+    if pid_data["PID"]["portrait"] == "M":
+        pid_data["PID"]["portrait"] = add_number_to_image(
             Path(__file__).parent.parent / "image.jpeg", int(test_case)
         )
     else:
-        pid_data["mDL"]["portrait"] = add_number_to_image(
+        pid_data["PID"]["portrait"] = add_number_to_image(
             Path(__file__).parent.parent / "image2.jpeg", int(test_case)
         )
 
@@ -114,3 +113,4 @@ def pid_test_case_form():
         user_id=user_id,
         redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet"),
     )
+
