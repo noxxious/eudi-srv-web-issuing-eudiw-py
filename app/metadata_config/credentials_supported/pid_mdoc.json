@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "PID",
+        "name": "PID (mdoc)",
         "locale": "en",
         "logo": {
           "uri": "https://examplestate.com/public/pid.png",

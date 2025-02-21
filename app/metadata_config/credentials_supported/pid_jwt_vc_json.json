@@ -28,7 +28,7 @@
     },
     "display": [
       {
-        "name": "PID",
+        "name": "PID (SD-JWT)",
         "locale": "en",
         "logo": {
           "uri": "https://examplestate.com/public/pid.png",
