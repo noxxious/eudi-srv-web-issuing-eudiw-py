@@ -40,9 +40,9 @@ class ConfCountries:
             "pid_url_oidc": urljoin(
                 cfgserv.service_url, "eidasnode/lightrequest?country=EU"
             ),
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LT_DEV.key.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/pid_ds_0001_lt_dev.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes,
-            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LT_DEV.cert.der",
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/pid_ds_0001_lt_dev.cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
@@ -59,9 +59,9 @@ class ConfCountries:
         formCountry: {
             "name": "FormEU",
             "pid_url": urljoin(cfgserv.service_url, "pid/form"),
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LT_DEV.key.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/pid_ds_0001_lt_dev.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LT_DEV.cert.der",
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/pid_ds_0001_lt_dev.cert.der",
             "un_distinguishing_sign": "FC",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
