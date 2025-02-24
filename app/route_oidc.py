@@ -1,4 +1,4 @@
-# coding: latin-1
+# coding: utf-8
 ###############################################################################
 # Copyright (c) 2023 European Commission
 #
@@ -63,7 +63,6 @@ from app.misc import auth_error_redirect, authentication_error_redirect, scope2d
 
 from datetime import datetime, timedelta
 
-#!/usr/bin/env python3
 import requests
 
 from .app_config.config_service import ConfService as cfgservice
@@ -93,7 +92,7 @@ def _add_cookie(resp: Response, cookie_spec: Union[dict, list]):
     resp.set_cookie(cookie_spec["name"], **kwargs)
 
 
-def add_cookie(resp: Response, cookie_spec: Union[dict, list]):
+def add_cookie(resp: Response, cookie_spec: Union[dict, list]) -> None:
     if isinstance(cookie_spec, list):
         for _spec in cookie_spec:
             _add_cookie(resp, _spec)
@@ -116,31 +115,19 @@ def keys():
 def do_response(endpoint, req_args, error="", **args) -> Response:
     info = endpoint.do_response(request=req_args, error=error, **args)
     # _log = current_app.logger
-    cfgservice.app_logger.info("do_response: {}".format(info))
+    logger = cfgservice.app_logger.getChild("do_response")
 
     try:
         _response_placement = info["response_placement"]
     except KeyError:
         _response_placement = endpoint.response_placement
 
-    cfgservice.app_logger.debug("response_placement: {}".format(_response_placement))
-
-    if error:
-        if _response_placement == "body":
-            cfgservice.app_logger.info("Error Response: {}".format(info["response"]))
-            _http_response_code = info.get("response_code", 400)
-            resp = make_response(info["response"], _http_response_code)
-        else:  # _response_placement == 'url':
-            cfgservice.app_logger.info("Redirect to: {}".format(info["response"]))
-            resp = redirect(info["response"])
-    else:
-        if _response_placement == "body":
-            cfgservice.app_logger.info("Response: {}".format(info["response"]))
-            _http_response_code = info.get("response_code", 200)
-            resp = make_response(info["response"], _http_response_code)
-        else:  # _response_placement == 'url':
-            cfgservice.app_logger.info("Redirect to: {}".format(info["response"]))
-            resp = redirect(info["response"])
+    if _response_placement == "body":
+        logger.info("Error Response: {} {}" if error else "Response: {} {}").format(info["response"], _response_placement)
+        resp = make_response(info["response"], info.get("response_code", 400 if error else 200))
+    else:  # _response_placement == 'url':
+        cfgservice.app_logger.info("Redirect to: {}".format(info["response"]))
+        resp = redirect(info["response"])
 
     for key, value in info["http_headers"]:
         resp.headers[key] = value
@@ -149,7 +136,6 @@ def do_response(endpoint, req_args, error="", **args) -> Response:
         add_cookie(resp, info["cookie"])
 
     return resp
-
 
 def verify(authn_method):
     """

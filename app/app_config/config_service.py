@@ -378,6 +378,7 @@ class ConfService:
             "eu.europa.ec.eudi.hiid_mdoc",
             "eu.europa.ec.eudi.tax_mdoc",
             "eu.europa.ec.eudi.msisdn_mdoc",
+            "eu.europa.ec.eudi.mdl_mdoc",
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",

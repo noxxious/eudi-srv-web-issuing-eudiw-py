@@ -128,7 +128,7 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           status: ${{ job.status }}
-          content: "Hey"
+          content: "Deployment status"
           title: "deploy"
           description: "Issuer deployment complete"
           color: 0x0000ff

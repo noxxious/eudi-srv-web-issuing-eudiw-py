@@ -219,9 +219,9 @@ class ConfCountries:
             "testcase_redirect_uri": urljoin(
                 cfgserv.service_url, "testcase/lt/mdl/mdl_test_case_form"
             ),
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/MDL-DS-0001_LT_DEV.key.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/mdl_ds_0001_lt_dev.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/MDL-DS-0001_LT_DEV.cert.der",
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/mdl_ds_0001_lt_dev.cert.der",
             "un_distinguishing_sign": "LT",
             "supported_credentials": [
                 "eu.europa.ec.eudi.mdl_mdoc",
@@ -235,9 +235,9 @@ class ConfCountries:
             "testcase_redirect_uri": urljoin(
                 cfgserv.service_url, "testcase/lt/pid/pid_test_case_form"
             ),
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LT_DEV.key.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/pid_ds_0001_lt_dev.key.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LT_DEV.cert.der",
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/pid_ds_0001_lt_dev.cert.der",
             "un_distinguishing_sign": "LT",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",

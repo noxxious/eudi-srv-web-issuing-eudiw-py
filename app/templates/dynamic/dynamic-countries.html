@@ -49,7 +49,7 @@
                                 {% for key, value in countries.items() %}
                                 <div class="flag">
                                     <input type="radio" value="{{ key }}" id="{{ key }}" name="country" class="{{ value["un_distinguishing_sign"] }}">
-                                    <label for="{{ key }}" class="{{ key }} countryName">{{ value }}</label>
+                                    <label for="{{ key }}" class="{{ value["un_distinguishing_sign"] }} countryName">{{ value }}</label>
                                 </div>
                                 {% endfor %}
                                 <!-- <div class="flag">

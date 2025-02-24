@@ -2915,7 +2915,7 @@ body.contrast .separation {
 
 .flag {
     float: left;
-    width: 33%
+    width: 100%
 }
 
 ul.errorMessage li:before {
