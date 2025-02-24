@@ -67,64 +67,65 @@ def setup_metadata():
 def setup_trusted_CAs():
     global trusted_CAs
 
-    try:
-        ec_keys = {}
-        for file in os.listdir(cfgserv.trusted_CAs_path):
-            if file.endswith("pem"):
-                CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
+    ec_keys = {}
+    for file in os.listdir(cfgserv.trusted_CAs_path):
+        if not file.endswith("pem"): continue
 
-                with open(CA_path) as pem_file:
+        try:
+            CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
 
-                    pem_data = pem_file.read()
+            with open(CA_path) as pem_file:
 
-                    pem_data = pem_data.encode()
+                pem_data = pem_file.read()
 
-                    certificate = x509.load_pem_x509_certificate(
-                        pem_data, default_backend()
-                    )
+                pem_data = pem_data.encode()
 
-                    public_key = certificate.public_key()
+                certificate = x509.load_pem_x509_certificate(
+                    pem_data, default_backend()
+                )
 
-                    issuer = certificate.issuer
+                public_key = certificate.public_key()
 
-                    not_valid_before = certificate.not_valid_before
+                issuer = certificate.issuer
 
-                    not_valid_after = certificate.not_valid_after
+                not_valid_before = certificate.not_valid_before
 
-                    x = public_key.public_numbers().x.to_bytes(
-                        (public_key.public_numbers().x.bit_length() + 7)
-                        // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+                not_valid_after = certificate.not_valid_after
 
-                    y = public_key.public_numbers().y.to_bytes(
-                        (public_key.public_numbers().y.bit_length() + 7)
-                        // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+                x = public_key.public_numbers().x.to_bytes(
+                    (public_key.public_numbers().x.bit_length() + 7)
+                    // 8,  # Number of bytes needed
+                    "big",  # Byte order
+                )
 
-                    ec_key = EC2Key(
-                        x=x, y=y, crv=1
-                    )  # SECP256R1 curve is equivalent to P-256
+                y = public_key.public_numbers().y.to_bytes(
+                    (public_key.public_numbers().y.bit_length() + 7)
+                    // 8,  # Number of bytes needed
+                    "big",  # Byte order
+                )
 
-                    ec_keys.update(
-                        {
-                            issuer: {
-                                "certificate": certificate,
-                                "public_key": public_key,
-                                "not_valid_before": not_valid_before,
-                                "not_valid_after": not_valid_after,
-                                "ec_key": ec_key,
-                            }
+                ec_key = EC2Key(
+                    x=x, y=y, crv=1
+                )  # SECP256R1 curve is equivalent to P-256
+
+                ec_keys.update(
+                    {
+                        issuer: {
+                            "certificate": certificate,
+                            "public_key": public_key,
+                            "not_valid_before": not_valid_before,
+                            "not_valid_after": not_valid_after,
+                            "ec_key": ec_key,
                         }
-                    )
+                    }
+                )
 
-    except FileNotFoundError as e:
-        cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
-    except Exception as e:
-        cfgserv.app_logger.exception(
-            f"TrustedCA Error: An unexpected error occurred.\n {e}"
-        )
+        except FileNotFoundError as e:
+            cfgserv.app_logger.exception(f"TrustedCA Error: file not found. {file} {e}")
+        except Exception as e:
+            cfgserv.app_logger.exception(
+                f"TrustedCA Error: An unexpected error occurred. {file} {e}"
+            )
 
     trusted_CAs = ec_keys
 
