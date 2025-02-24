@@ -122,7 +122,7 @@ def Supported_Countries():
         )
         if res:
             display_countries.update(
-                {str(country): str(country_config["name"])}
+                {str(country): country_config}
             )
 
     form_keys = request.form.keys()

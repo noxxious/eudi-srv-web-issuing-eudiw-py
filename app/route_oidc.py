@@ -530,15 +530,14 @@ def pid_authorization_get():
 @oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
     token = request.args.get("token")
+    logger = cfgservice.app_logger.getChild("auth_choice")
 
     supported_credencials = cfgservice.auth_method_supported_credencials
     pid_auth = True
     country_selection = True
 
     if "authorization_params" not in session:
-        cfgservice.app_logger.info(
-            "Authorization Params didn't exist in Authentication Choice"
-        )
+        logger.info("Authorization Params didn't exist in Authentication Choice")
         return render_template(
             "misc/500.html",
             error="Invalid Authentication. No authorization details or scope found.",
@@ -562,6 +561,11 @@ def auth_choice():
         elif "vct" in cred:
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(cred["vct"])
+    logger.info({
+        "authorization_details": authorization_details,
+        "authorization_params": authorization_params,
+        "credentials_requested": credentials_requested,
+    })
 
     for cred in credentials_requested:
         if (

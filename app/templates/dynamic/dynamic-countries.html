@@ -44,12 +44,13 @@
                         <h2>Please select your country of origin</h2>
                        <form id="selectCountryForm" method="post" action="{{redirect_url}}dynamic/?authorization_details={{authorization_details}}" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded;charset=UTF-8" autocapitalize="off" spellcheck="false">
                             <h3>Test Credentials Provider</h3>
+                            <p><b>Details:</b> {{authorization_details}} </h2>
                             <p>This Credentials Provider should only be used for issuing Credentials for testing purposes.</p>
                             <div id="eidasCountries">
                                 {% for key, value in countries.items() %}
                                 <div class="flag">
                                     <input type="radio" value="{{ key }}" id="{{ key }}" name="country" class="{{ value["un_distinguishing_sign"] }}">
-                                    <label for="{{ key }}" class="{{ value["un_distinguishing_sign"] }} countryName">{{ value }}</label>
+                                    <label for="{{ key }}" class="{{ value["un_distinguishing_sign"] }} countryName">{{ value["name"] }}</label>
                                 </div>
                                 {% endfor %}
                                 <!-- <div class="flag">
