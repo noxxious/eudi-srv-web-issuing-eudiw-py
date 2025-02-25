@@ -123,10 +123,11 @@ def do_response(endpoint, req_args, error="", **args) -> Response:
         _response_placement = endpoint.response_placement
 
     if _response_placement == "body":
-        logger.info("Error Response: {} {}" if error else "Response: {} {}").format(info["response"], _response_placement)
+        log_msg = {"message": "error response" if error else "response", "error": error, "info": info["response"], "placement": _response_placement}
+        logger.error(log_msg) if error else logger.info(log_msg)
         resp = make_response(info["response"], info.get("response_code", 400 if error else 200))
     else:  # _response_placement == 'url':
-        cfgservice.app_logger.info("Redirect to: {}".format(info["response"]))
+        logger.info({"message": "redirect to: {}".format(info["response"])})
         resp = redirect(info["response"])
 
     for key, value in info["http_headers"]:

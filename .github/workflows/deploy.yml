@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Google Auth
         id: auth
@@ -128,10 +128,10 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           status: ${{ job.status }}
-          content: "Deployment status"
+          content: "deployment status: ${{ job.status }}"
           title: "deploy"
           description: "Issuer deployment complete"
           color: 0x0000ff
           url: "https://github.com/noxxious/eudi-srv-web-issuing-eudiw-py"
-          username: GitHub Actions
+          username: Issuer deploy
       
