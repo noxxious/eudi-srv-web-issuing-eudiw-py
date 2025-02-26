@@ -315,12 +315,12 @@ class ConfService:
             "organization_name": qeaa_issuing_authority,
             "namespace": "teste",
         },
-        "org.iso.23220.photoid.1": {
+        "org.iso.23220.PhotoId.1": {
             "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
             "organization_name": qeaa_issuing_authority,
-            "namespace": "org.iso.23220.photoid.1",
+            "namespace": "org.iso.23220.PhotoId.1",
         },
         "eu.europa.ec.eudi.por.1": {
             "issuing_authority": qeaa_issuing_authority,
@@ -387,7 +387,7 @@ class ConfService:
             "eu.europa.ec.eudi.pid_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
-            "eu.europa.ec.eudi.photoid",
+            "eu.europa.ec.eudi.PhotoId",
             "eu.europa.ec.eudi.por_mdoc",
             "eu.europa.ec.eudi.iban_mdoc",
             "eu.europa.ec.eudi.hiid_mdoc",

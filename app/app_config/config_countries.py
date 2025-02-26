@@ -71,7 +71,7 @@ class ConfCountries:
                 "eu.europa.ec.eudi.loyalty_mdoc",
                 "eu.europa.ec.eudi.pseudonym_over18_mdoc",
                 "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
-                "eu.europa.ec.eudi.photoid",
+                "eu.europa.ec.eudi.PhotoId",
                 "eu.europa.ec.eudi.por_mdoc",
                 "eu.europa.ec.eudi.iban_mdoc",
                 "eu.europa.ec.eudi.hiid_mdoc",

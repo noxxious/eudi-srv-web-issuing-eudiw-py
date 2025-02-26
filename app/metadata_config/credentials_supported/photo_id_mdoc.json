@@ -1,8 +1,8 @@
 {
-"eu.europa.ec.eudi.photoid": {
+"eu.europa.ec.eudi.PhotoId": {
     "format": "mso_mdoc",
-    "doctype": "org.iso.23220.photoid.1",
-    "scope": "org.iso.23220.photoid.1",
+    "doctype": "org.iso.23220.PhotoId.1",
+    "scope": "org.iso.23220.PhotoId.1",
     "cryptographic_binding_methods_supported": [
       "jwk", "cose_key"
     ],
@@ -38,7 +38,7 @@
       }
     ],
     "claims": {
-      "org.iso.23220.photoid.1": {
+      "org.iso.23220.PhotoId.1": {
         "portrait": {
           "mandatory": true,
           "value_type":"jpeg",
