@@ -315,7 +315,7 @@ class ConfService:
             "organization_name": qeaa_issuing_authority,
             "namespace": "teste",
         },
-        "org.iso.23220.2.photoid.1": {
+        "org.iso.23220.photoid.1": {
             "issuing_authority": qeaa_issuing_authority,
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
