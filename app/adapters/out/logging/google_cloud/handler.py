@@ -35,26 +35,14 @@ class GoogleCloudHandler(StructuredLogHandler):
             **kwargs,
         )
 
-    #def emit(self, record):
-    #    # Get project_id from Cloud Run environment
-    #    project = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    def format(self, record):
+        # Get project_id from Cloud Run environment
+        project = os.environ.get("GOOGLE_CLOUD_PROJECT")
 
-    #    # Build structured log messages as an object.
-    #    global_log_fields = {}
-    #    if request:
-    #        trace_header = request.headers.get("X-Cloud-Trace-Context")
+        trace = getattr(record, "trace", ) or getattr(record, "_trace", None) or None
+        if trace and f"projects/{project}/traces" not in trace:
+            record.trace = f"projects/{project}/traces/{trace}"
+            record._trace = f"projects/{project}/traces/{trace}"
 
-    #        if trace_header and project:
-    #            trace = trace_header.split("/")
-    #            record["logging.googleapis.com/trace"] = f"projects/{project}/traces/{trace[0]}" 
-    #            record["trace"] = trace[0] 
-
-
-    #    record._trace = f"projects/{project}/traces/{record._trace}"
-
-    #    # Complete a structured log entry.
-    #    record.severity = record.levelname
-    #    super().emit(record)
-
-    #    # print(json.dumps(record))
-    #    sys.stdout.flush()
+        # Complete a structured log entry.
+        return super().format(record)
