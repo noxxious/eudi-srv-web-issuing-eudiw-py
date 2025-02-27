@@ -73,11 +73,7 @@ def pid_test_case_form():
         }
     )
 
-    form_dynamic_data[user_id] = pid_data["PID"].copy()
-    form_dynamic_data[user_id].update(
-        {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
-    )
-
+    
     if "jws_token" not in session or "authorization_params" in session:
         session["jws_token"] = session["authorization_params"]["token"]
     session["returnURL"] = cfgserv.OpenID_first_endpoint
@@ -98,6 +94,11 @@ def pid_test_case_form():
     pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
 
     user_id = f"{session["country"]}.{user_id}"
+
+    form_dynamic_data[user_id] = pid_data["PID"].copy()
+    form_dynamic_data[user_id].update(
+        {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
+    )
 
     logger.info(
         {
