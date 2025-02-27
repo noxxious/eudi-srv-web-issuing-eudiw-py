@@ -1,21 +1,13 @@
 import logging
 from .handler import GoogleCloudHandler
 from google.cloud.logging_v2.handlers import setup_logging
+import os
 
 def init(): 
     logging.getLogger().handlers.clear()
-    handler = GoogleCloudHandler()
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    handler = GoogleCloudHandler(project_id=project)
     setup_logging(handler)
 
 def get_logger(name):
-    logger = logging.getLogger(name)
-
-    #if not logger.handlers:
-    #    gcp_handler = GoogleCloudHandler()
-    #    gcp_handler.setLevel(logging.DEBUG)
-
-    #    # gcp_formatter = logging.Formatter(
-    #    #    '%(levelname)s %(asctime)s [%(filename)s:%(funcName)s:%(lineno)d] %(message)s')
-    #    # gcp_handler.setFormatter(gcp_formatter)
-    #    #logger.addHandler(gcp_handler)
-    return logger
+    return logging.getLogger(name)
