@@ -66,6 +66,7 @@ def setup_metadata():
 
 def setup_trusted_CAs():
     global trusted_CAs
+    logger = cfgserv.app_logger.getChild("trusted_ca_loader")
 
     ec_keys = {}
     for file in os.listdir(cfgserv.trusted_CAs_path):
@@ -74,6 +75,7 @@ def setup_trusted_CAs():
         try:
             CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
 
+            logger.debug(f"Loading CA: {CA_path}")
             with open(CA_path) as pem_file:
 
                 pem_data = pem_file.read()
@@ -133,7 +135,7 @@ def handle_exception(e):
     # pass through HTTP errors
     if isinstance(e, HTTPException):
         return e
-    cfgserv.app_logger.exception("- WARN - Error 500")
+    cfgserv.app_logger.error("- WARN - Error 500", e)
     # now you're handling non-HTTP exceptions only
     return (
         render_template(
@@ -146,7 +148,7 @@ def handle_exception(e):
 
 
 def page_not_found(e):
-    cfgserv.app_logger.exception("- WARN - Error 404")
+    cfgserv.app_logger.exception("- WARN - Error 404", e)
     return (
         render_template(
             "misc/500.html",

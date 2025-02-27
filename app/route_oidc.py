@@ -148,12 +148,14 @@ def verify(authn_method):
     """
     # kwargs = dict([(k, v) for k, v in request.form.items()])
 
+    logger = cfgservice.app_logger.getChild("verify")
+
     try:
         username = authn_method.verify(username=request.args.get("username"))
 
         auth_args = authn_method.unpack_token(request.args.get("jws_token"))
     except:
-        cfgservice.app_logger.error(
+        logger.error(
             "Authorization verification: username or jws_token not found"
         )
         if "jws_token" in request.args:
@@ -182,8 +184,13 @@ def verify(authn_method):
     args = endpoint.authz_part2(request=authz_request, session_id=_session_id)
 
     if isinstance(args, ResponseMessage) and "error" in args:
+        logger.error({"message": f"Authorization error: {args["error"]}", "args": args.to_json()}) 
         return make_response(args.to_json(), 400)
 
+    if "session_id" not in session:
+        logger.error({"message": f"session is not available", "args": args.to_json()}) 
+        return make_response(args.to_json(), 400)
+        
     session_ids[session["session_id"]]["auth_code"] = args["response_args"]["code"]
 
     logText = (
@@ -198,7 +205,7 @@ def verify(authn_method):
 
         logText = logText + ", State: " + args["response_args"]["state"]
 
-    cfgservice.app_logger.info(logText)
+    logger.info(logText)
 
     return do_response(endpoint, request, **args)
 
@@ -1239,7 +1246,12 @@ def service_endpoint(endpoint):
             args = endpoint.process_request(req_args)
             if "response_args" in args:
                 if "error" in args["response_args"]:
-                    logger.error({"message": "error in credential response args", "args":args})
+                    error = args["response_args"]["error"]
+                    error_description = args["response_args"].get("error_description", "")
+                    logger.error({
+                        "message": f"error in credential response args: {error} {error_description}", 
+                        "args":args
+                    })
                     return (
                         jsonify(args["response_args"]),
                         400,
