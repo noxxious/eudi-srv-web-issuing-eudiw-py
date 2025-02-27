@@ -39,7 +39,7 @@ class GoogleCloudHandler(StructuredLogHandler):
         # Get project_id from Cloud Run environment
         project = os.environ.get("GOOGLE_CLOUD_PROJECT")
 
-        trace = getattr(record, "trace", ) or getattr(record, "_trace", None) or None
+        trace = getattr(record, "trace", None) or getattr(record, "_trace", None) or None
         if trace and f"projects/{project}/traces" not in trace:
             record.trace = f"projects/{project}/traces/{trace}"
             record._trace = f"projects/{project}/traces/{trace}"
