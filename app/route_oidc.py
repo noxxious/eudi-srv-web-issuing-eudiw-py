@@ -1250,7 +1250,8 @@ def service_endpoint(endpoint):
                     error_description = args["response_args"].get("error_description", "")
                     logger.error({
                         "message": f"error in credential response args: {error} {error_description}", 
-                        "args":args
+                        "args":args,
+                        "req_args": req_args
                     })
                     return (
                         jsonify(args["response_args"]),
