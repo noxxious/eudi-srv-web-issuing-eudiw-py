@@ -49,7 +49,7 @@ class GoogleCloudHandler(StructuredLogHandler):
                 record["logging.googleapis.com/trace"] = f"projects/{project}/traces/{trace[0]}" 
                 record["trace"] = trace[0] 
 
-        record["trace"] = f"projects/{project}/traces/{record['trace']}"
+        record["trace"] = f"projects/{project}/traces/{record.trace}"
 
         # Complete a structured log entry.
         record.severity = record.levelname
