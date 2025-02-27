@@ -6,7 +6,7 @@ import os
 def init(): 
     logging.getLogger().handlers.clear()
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    handler = GoogleCloudHandler(project_id=project)
+    handler = GoogleCloudHandler(project_id=project_id)
     setup_logging(handler)
 
 def get_logger(name):
