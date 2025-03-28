@@ -17,7 +17,7 @@
 ###############################################################################
 """
 This route simulates a pre-authorization flow.
-Currently the libraries used do not support pre-authorization. 
+Currently the libraries used do not support pre-authorization.
 This route generates a client registration capable of using a pre-authorization code for testing purposes.
 """
 
@@ -322,7 +322,9 @@ def generate_offer(data):
     )
 
     credential_offer = {
-        "credential_issuer": urlparse(cfgservice.service_url)._replace(path="").geturl(),
+        "credential_issuer": urlparse(cfgservice.service_url)
+        ._replace(path="")
+        .geturl(),
         "credential_configuration_ids": session["credentials_id"],
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
@@ -420,7 +422,9 @@ def credentialOfferReq2():
     )
 
     credential_offer = {
-        "credential_issuer": urlparse(cfgservice.service_url)._replace(path="").geturl(),
+        "credential_issuer": urlparse(cfgservice.service_url)
+        ._replace(path="")
+        .geturl(),
         "credential_configuration_ids": credential_ids,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
@@ -485,7 +489,7 @@ def generate_preauth_token(data, authorization_details):
 
     if not request_uri in parRequests:  # unknow request_uri => return error
         # needs to be changed to an appropriate error message, and need to be logged
-        return service_endpoint(current_app.server.get_endpoint("authorization"))
+        return service_endpoint(oidc_server().get_endpoint("authorization"))
 
     session_id = getSessionId_requestUri(request_uri)
 
@@ -537,9 +541,7 @@ def generate_preauth_token(data, authorization_details):
     params.update(args)
 
     try:
-        authn_method = current_app.server.get_context().authn_broker.get_method_by_id(
-            "user"
-        )
+        authn_method = oidc_server().get_context().authn_broker.get_method_by_id("user")
         username = authn_method.verify(username=user_id)
 
         auth_args = authn_method.unpack_token(params["token"])
@@ -553,7 +555,7 @@ def generate_preauth_token(data, authorization_details):
 
     authz_request = AuthorizationRequest().from_urlencoded(auth_args["query"])
 
-    endpoint = current_app.server.get_endpoint("authorization")
+    endpoint = oidc_server().get_endpoint("authorization")
 
     _session_id = endpoint.create_session(
         authz_request,

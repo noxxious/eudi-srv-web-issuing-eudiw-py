@@ -16,7 +16,7 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -35,6 +35,12 @@ from flask.helpers import make_response
 from redirect_func import url_get
 import json
 import uuid
+from idpyoidc.server import Server
+
+
+def oidc_server() -> Server:
+    """Retrieves the OIDC service instance."""
+    return current_app.server
 
 
 def create_dict(dict, item):
@@ -163,6 +169,7 @@ def getMandatoryAttributes(attributes):
 
     return attributes_form
 
+
 def getAttributesForm2(credentials_requested):
     """
     Function to get attributes needed to populate form depending credentials requested by user
@@ -217,6 +224,7 @@ def getOptionalAttributes(attributes):
 
     return attributes_form
 
+
 def getIssuerFilledAttributes(attributes):
     """
     Function to get mandatory attributes from credential
@@ -258,17 +266,26 @@ def validate_image(file):
 
     return True, None
 
+
 def vct2scope(vct: str):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     for credential in credentialsSupported:
-        if "vct" in credentialsSupported[credential] and credentialsSupported[credential]["vct"] == vct:
+        if (
+            "vct" in credentialsSupported[credential]
+            and credentialsSupported[credential]["vct"] == vct
+        ):
             return credentialsSupported[credential]["scope"]
+
 
 def doctype2vct(doctype: str):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     for credential in credentialsSupported:
-        if "vct" in credentialsSupported[credential] and credentialsSupported[credential]["scope"] == doctype:
+        if (
+            "vct" in credentialsSupported[credential]
+            and credentialsSupported[credential]["scope"] == doctype
+        ):
             return credentialsSupported[credential]["vct"]
+
 
 # Generates authorization details from a scope
 # First supported credential found of that doctype
@@ -306,9 +323,7 @@ def credential_error_resp(error, desc):
 
 # Error redirection to the wallet during authentication
 def authentication_error_redirect(jws_token, error, error_description):
-    authn_method = current_app.server.get_context().authn_broker.get_method_by_id(
-        "user"
-    )
+    authn_method = oidc_server().get_context().authn_broker.get_method_by_id("user")
     try:
         auth_args = authn_method.unpack_token(jws_token)
     except:

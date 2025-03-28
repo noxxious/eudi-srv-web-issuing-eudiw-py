@@ -16,10 +16,9 @@
 #
 ###############################################################################
 """
-This manages necessary data and it's removal 
+This manages necessary data and it's removal
 
 """
-
 import json
 import threading
 from datetime import datetime
@@ -34,10 +33,10 @@ transaction_codes = {}
 deferredRequests = {}
 oid4vp_requests = {}
 form_dynamic_data = {}
-session_ids = {}
+session_ids: dict[str, dict] = {}
 
 
-def getSessionId_requestUri(target_request_uri):
+def getSessionId_requestUri(target_request_uri: str | None):
     matching_session_id = None
     for session_id, session_data in session_ids.items():
 
@@ -51,7 +50,7 @@ def getSessionId_requestUri(target_request_uri):
     return matching_session_id
 
 
-def getSessionId_authCode(target_authCode):
+def getSessionId_authCode(target_authCode: str):
     matching_session_id = None
     for session_id, session_data in session_ids.items():
         if "auth_code" in session_data and session_data["auth_code"] == target_authCode:
@@ -61,7 +60,7 @@ def getSessionId_authCode(target_authCode):
     return matching_session_id
 
 
-def getSessionId_accessToken(target_accessToken):
+def getSessionId_accessToken(target_accessToken: str):
     matching_session_id = None
     for session_id, session_data in session_ids.items():
         if (

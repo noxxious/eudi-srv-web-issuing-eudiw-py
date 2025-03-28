@@ -25,11 +25,12 @@ CORS(blueprint)  # enable CORS on the blue print
 app = Flask(__name__)
 from app.data_management import form_dynamic_data
 
-"""Form page for test cases.
-    Form page where the user can select PID test case.
-    """
+
 @blueprint.route("/pid_test_case_form", methods=["GET", "POST"])
 def pid_test_case_form():
+    """Form page for test cases.
+    Form page where the user can select PID test case.
+    """
     session["route"] = "/testcase/lt/pid/pid_test_case_form"
     session["version"] = "0.5"
     session["country"] = "LT-PID"
@@ -89,13 +90,19 @@ def pid_test_case_form():
 
     pid_data["PID"].update({"issuance_date": today.strftime("%Y-%m-%d")})
     pid_data["PID"].update({"expiry_date": expiry.strftime("%Y-%m-%d")})
-    pid_data["PID"].update({"issuing_country": "LT"}),
+    pid_data["PID"].update({"issuing_country": "LT"})
     pid_data["PID"].update({"issuing_authority": doctype_config["issuing_authority"]})
-    pid_data["PID"].update({"age_in_years": calculate_age(pid_data["PID"]["birth_date"])})
-    pid_data["PID"].update({"age_over_18": (True if pid_data["PID"]["age_in_years"] >= 18 else False)})
-    pid_data["PID"].update({"age_birth_year": get_birth_year(pid_data["PID"]["birth_date"])})
+    pid_data["PID"].update(
+        {"age_in_years": calculate_age(pid_data["PID"]["birth_date"])}
+    )
+    pid_data["PID"].update(
+        {"age_over_18": (True if pid_data["PID"]["age_in_years"] >= 18 else False)}
+    )
+    pid_data["PID"].update(
+        {"age_birth_year": get_birth_year(pid_data["PID"]["birth_date"])}
+    )
 
-    pid_data["PID"].update({"un_distinguishing_sign": "LT"}),
+    pid_data["PID"].update({"un_distinguishing_sign": "LT"})
 
     user_id = f"{session["country"]}.{user_id}"
 
@@ -113,4 +120,3 @@ def pid_test_case_form():
         user_id=user_id,
         redirect_url=urljoin(cfgserv.service_url, "dynamic/redirect_wallet"),
     )
-
