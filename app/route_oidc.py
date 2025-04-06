@@ -434,6 +434,14 @@ def authorizationv2(
 def authorizationV3():
     logger = cfgservice.app_logger.getChild("authorizationV3")
 
+    logger.info(
+        {
+            "message": "authorization request received",
+            "request": dict(request.args),
+            "session": session,
+        }
+    )
+
     if "request_uri" not in request.args:
         try:
             client_id = request.args.get("client_id")
@@ -470,7 +478,12 @@ def authorizationV3():
     session_id = getSessionId_requestUri(request_uri)
 
     if session_id == None:
-        logger.error("Authorization request_uri not found.")
+        logger.error(
+            {
+                "message": "Authorization request_uri not found.",
+                "request": dict(request.args),
+            }
+        )
         return make_response("Request_uri not found", 400)
 
     logger.info(
@@ -533,6 +546,10 @@ def authorizationV3():
 
     session["authorization_params"] = params
 
+    logger.info(
+        {"message": "authorization succcess", "respose": response, "session": session}
+    )
+
     return redirect(response["url"])
 
 
@@ -569,7 +586,12 @@ def auth_choice():
     country_selection = True
 
     if "authorization_params" not in session:
-        logger.info("Authorization Params didn't exist in Authentication Choice")
+        logger.info(
+            {
+                "messsage": "authorization params didn't exist in Authentication Choice",
+                "session": session,
+            }
+        )
         return render_template(
             "misc/500.html",
             error="Invalid Authentication. No authorization details or scope found.",
