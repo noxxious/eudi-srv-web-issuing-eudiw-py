@@ -54,8 +54,13 @@ def pid_test_case_form():
 
     test_case = form_data.get("case", "1")
 
-    pid_data = test_cases.get(test_case, test_cases["default"])
+    pid_data = test_cases.get(test_case, None)
 
+    if not pid_data:
+        return (
+            "Invalid pid selection",
+            status.HTTP_400_BAD_REQUEST,
+        )
     user_id = generate_unique_id()
 
     if pid_data["PID"]["portrait"] == "M":
