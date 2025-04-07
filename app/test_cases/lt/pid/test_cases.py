@@ -69,7 +69,7 @@ test_cases = {
             "email_address": "vardas69@pavarde.lt",
             "mobile_phone_number": "+3769999998",
             "issuance_date":"2024-10-15",
-            "expiry_date":"2024-12-15",
+            "expiry_date":"2026-10-15",
             "document_number": "12345"
         }
     },
@@ -95,7 +95,7 @@ test_cases = {
             "email_address": "marge.simpsoniene@simpsonai.lt",
             "mobile_phone_number": "+3769999999",
             "issuance_date": "2024-10-15",
-            "expiry_date": "2024-12-15",
+            "expiry_date": "2026-10-15",
             "document_number": "01234"
         }
     },
