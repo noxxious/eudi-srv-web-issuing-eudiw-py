@@ -20,10 +20,10 @@ test_cases = {
             "sex": 1,
             "email_address": "vardas69@pavarde.lt",
             "mobile_phone_number": "+3769999998",
-            "document_number": "12345"
+            "document_number": "pid_1",
         }
     },
-    "default": {
+    "2": {
         "PID": {
             "family_name": "Simpsoniene",
             "given_name": "Marge",
@@ -44,7 +44,7 @@ test_cases = {
             "sex": 2,
             "email_address": "marge.simpsoniene@simpsonai.lt",
             "mobile_phone_number": "+3769999999",
-            "document_number": "01234"
+            "document_number": "pid_2",
         }
     },
 }

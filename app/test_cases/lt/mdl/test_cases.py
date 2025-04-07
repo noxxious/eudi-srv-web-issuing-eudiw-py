@@ -5,7 +5,7 @@ test_cases = {
             "given_name": "Vardas",
             "birth_date": "2008-07-10",
             "document_number": "002447688",
-            "administrative_number": "30807100001",
+            "administrative_number": "mdl_1",
             "portrait": "M",
             "driving_privileges": [
                 {"vehicle_category_code": "AM", "issue_date": "2023-10-19"}
@@ -18,7 +18,7 @@ test_cases = {
             "given_name": "Marge",
             "birth_date": "1966-03-18",
             "document_number": "00111111",
-            "administrative_number": "46603180001",
+            "administrative_number": "mdl_2",
             "portrait": "F",
             "driving_privileges": [
                 {"vehicle_category_code": "B1", "issue_date": "1990-04-20"},
@@ -32,7 +32,7 @@ test_cases = {
             "family_name": "Simpsonaite",
             "given_name": "Lisa",
             "birth_date": "1966-03-18",
-            "administrative_number": "46603180002",
+            "administrative_number": "mdl_3",
             "document_number": "00222222",
             "portrait": "F",
             "driving_privileges": [
@@ -60,7 +60,7 @@ test_cases = {
             "given_name": "Simpson",
             "birth_date": "1954-05-19",
             "document_number": "00333333",
-            "administrative_number": "35405190001",
+            "administrative_number": "mdl_4",
             "portrait": "M",
             "driving_privileges": [
                 {
@@ -99,7 +99,7 @@ test_cases = {
             "given_name": "Bartas",
             "birth_date": "1960-01-06",
             "document_number": "00444444",
-            "administrative_number": "36001060001",
+            "administrative_number": "mdl_5",
             "portrait": "M",
             "driving_privileges": [
                 {
@@ -119,7 +119,7 @@ test_cases = {
             "given_name": "MATTHEW MICHAEL CHARLES",
             "birth_date": "1960-01-06",
             "document_number": "00555555",
-            "administrative_number": "36001060001",
+            "administrative_number": "mdl_6",
             "portrait": "M",
             "driving_privileges": [
                 {
@@ -141,7 +141,7 @@ test_cases = {
             "family_name": "KORS",
             "given_name": "MICHAEL",
             "birth_date": "1968-02-01",
-            "administrative_number": "36802010001",
+            "administrative_number": "mdl_7",
             "document_number": "00666666",
             "portrait": "M",
             "driving_privileges": [
@@ -199,13 +199,13 @@ test_cases = {
             ],
         }
     },
-    "default": {
+    "8": {
         "mDL": {
             "family_name": "Jonas",
             "given_name": "Jonaitis",
             "birth_date": "1960-01-06",
             "document_number": "00777777",
-            "administrative_number": "36001060002",
+            "administrative_number": "mdl_8",
             "portrait": "M",
             "driving_privileges": [
                 {

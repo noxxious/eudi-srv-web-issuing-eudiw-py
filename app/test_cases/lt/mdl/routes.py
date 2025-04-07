@@ -55,7 +55,13 @@ def mdl_test_case_form():
 
     test_case = form_data.get("case", "1")
 
-    mdl_data = test_cases.get(test_case, test_cases["default"])
+    mdl_data = test_cases.get(test_case, None)
+    if not mdl_data:
+        return (
+            "Invalid mdl selection",
+            status.HTTP_400_BAD_REQUEST,
+        )
+
     user_id = generate_unique_id()
 
     if mdl_data["mDL"]["portrait"] == "M":
@@ -67,12 +73,20 @@ def mdl_test_case_form():
             Path(__file__).parent.parent / "image2.jpeg", int(test_case)
         )
 
-    mdl_data["mDL"].update({"signature_usual_mark": convert_image_to_base64(Path(__file__).parent / "signature.jpg")})
+    mdl_data["mDL"].update(
+        {
+            "signature_usual_mark": convert_image_to_base64(
+                Path(__file__).parent / "signature.jpg"
+            )
+        }
+    )
 
-    mdl_data["mDL"].update({
+    mdl_data["mDL"].update(
+        {
             "issuing_country": session["country"],
             "issuing_authority": cfgserv.mdl_issuing_authority,
-        })
+        }
+    )
 
     form_dynamic_data[user_id] = mdl_data["mDL"].copy()
     form_dynamic_data[user_id].update(
