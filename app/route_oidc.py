@@ -1497,7 +1497,8 @@ def service_endpoint(endpoint):
             "expires": args["http_response"]["expires_in"]
             + int(datetime.timestamp(datetime.now())),
         }
-        return make_response(args["http_response"], 201)
+        # TODO: Revert till I can debug more
+        # return make_response(args["http_response"], 201)
 
     if "redirect_location" in args:
         return redirect(args["redirect_location"])
