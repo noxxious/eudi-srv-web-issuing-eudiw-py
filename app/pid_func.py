@@ -16,18 +16,19 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
 This pid_func.py file contains PID related auxiliary functions.
 """
 import datetime
+from typing import Any
 from app_config.config_service import ConfService as cfgserv
 from misc import calculate_age
 
 
-def format_pid_data(dict):
+def format_pid_data(data: dict[str, Any]):
     """Formats PID data, from the format received from the eIDAS node, into the format expected by the CBOR formatter (route formatter/cbor)
 
     Keyword arguments:
@@ -36,24 +37,24 @@ def format_pid_data(dict):
 
     Return: dictionary in the format expected by the CBOR formatter (route formatter/cbor)
     """
-    birthdate = dict["birth_date"]
+    birthdate = data["birth_date"]
     today = datetime.date.today()
     expiry = today + datetime.timedelta(days=cfgserv.pid_validity)
     pdata = {
-        "family_name": dict["family_name"],
-        "given_name": dict["given_name"],
+        "family_name": data["family_name"],
+        "given_name": data["given_name"],
         "birth_date": birthdate,
         "age_over_18": True if calculate_age(birthdate) >= 18 else False,
         "issuance_date": today.strftime("%Y-%m-%d"),
         "expiry_date": expiry.strftime("%Y-%m-%d"),
         "issuing_authority": cfgserv.pid_issuing_authority,
-        "issuing_country": dict["issuing_country"],
+        "issuing_country": data["issuing_country"],
     }
 
     return pdata
 
 
-def format_sd_jwt_pid_data(dict):
+def format_sd_jwt_pid_data(data: dict[str, Any]):
     """Formats PID data, from the format received from the eIDAS node, into the format expected by the SD-JWT formatter (route formatter/sd-jwt)
 
     Keyword arguments:
@@ -62,7 +63,7 @@ def format_sd_jwt_pid_data(dict):
 
     Return: dictionary in the format expected by the SD-JWT formatter (route formatter/sd-jwt)
     """
-    birthdate = dict["birth_date"]
+    birthdate = data["birth_date"]
     today = datetime.date.today()
     expiry = today + datetime.timedelta(days=cfgserv.pid_validity)
     pdata = {
@@ -72,20 +73,20 @@ def format_sd_jwt_pid_data(dict):
                 "source": {
                     "organization_name": cfgserv.pid_issuing_authority,
                     "organization_id": cfgserv.pid_organization_id,
-                    "country_code": dict["issuing_country"],
+                    "country_code": data["issuing_country"],
                 },
             }
         ],
         "claims": {
             "eu.europa.ec.eudi.pid.1": {
-                "family_name": dict["family_name"],
-                "given_name": dict["given_name"],
+                "family_name": data["family_name"],
+                "given_name": data["given_name"],
                 "birth_date": birthdate,
                 "age_over_18": True if calculate_age(birthdate) >= 18 else False,
                 "issuance_date": today.strftime("%Y-%m-%d"),
                 "expiry_date": expiry.strftime("%Y-%m-%d"),
                 "issuing_authority": cfgserv.pid_issuing_authority,
-                "issuing_country": dict["issuing_country"],
+                "issuing_country": data["issuing_country"],
             }
         },
     }

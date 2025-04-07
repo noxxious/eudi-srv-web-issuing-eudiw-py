@@ -1,18 +1,19 @@
 {
-"eu.europa.ec.eudi.pid_mdoc": {
+  "eu.europa.ec.eudi.pid_mdoc": {
     "format": "mso_mdoc",
     "doctype": "eu.europa.ec.eudi.pid.1",
     "scope": "eu.europa.ec.eudi.pid.1",
     "policy": {
-        "batch_size": 50,
-        "one_time_use": true
+      "batch_size": 50,
+      "one_time_use": true
     },
     "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
+      "jwk",
+      "cose_key"
     ],
     "credential_alg_values_supported": [
-        -7
-      ],
+      -7
+    ],
     "credential_crv_values_supported": [
       1
     ],
@@ -51,37 +52,41 @@
       "eu.europa.ec.eudi.pid.1": {
         "family_name": {
           "mandatory": true,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Family Name(s)",
-              "locale": "en"            }
+              "locale": "en"
+            }
           ]
         },
         "given_name": {
           "mandatory": true,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Given Name(s)",
-              "locale": "en"            }
+              "locale": "en"
+            }
           ]
         },
         "birth_date": {
           "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
+          "value_type": "full-date",
+          "source": "user",
           "display": [
             {
               "name": "Birth Date",
-              "locale": "en"            }
+              "locale": "en"
+            }
           ]
         },
         "age_over_18": {
-          "mandatory": true,
-          "source":"issuer",
+          "mandatory": false,
+          "source": "user",
+          "value_type": "bool",
           "display": [
             {
               "name": "Age Over 18",
@@ -91,7 +96,7 @@
         },
         "age_in_years": {
           "mandatory": false,
-          "value_type":"uint",
+          "value_type": "uint",
           "display": [
             {
               "name": "Age in Years",
@@ -101,7 +106,7 @@
         },
         "age_birth_year": {
           "mandatory": false,
-          "value_type":"uint",
+          "value_type": "uint",
           "display": [
             {
               "name": "Age Year of Birth",
@@ -111,8 +116,8 @@
         },
         "family_name_birth": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Birth Family Name(s)",
@@ -122,8 +127,8 @@
         },
         "given_name_birth": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Birth Given Name(s)",
@@ -132,9 +137,9 @@
           ]
         },
         "birth_place": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "mandatory": true,
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Birth Place",
@@ -142,43 +147,10 @@
             }
           ]
         },
-        "birth_country": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Birth Country",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_state": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Birth State/Province",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_city": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Birth City",
-              "locale": "en"
-            }
-          ]
-        },
         "resident_address": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Resident Address",
@@ -188,8 +160,8 @@
         },
         "resident_country": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Resident Country",
@@ -199,8 +171,8 @@
         },
         "resident_state": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Resident State",
@@ -210,8 +182,8 @@
         },
         "resident_city": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Resident City",
@@ -221,8 +193,8 @@
         },
         "resident_postal_code": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Resident Postal Code",
@@ -232,8 +204,8 @@
         },
         "resident_street": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Resident Street",
@@ -243,8 +215,8 @@
         },
         "resident_house_number": {
           "mandatory": false,
-          "value_type":"string",
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Resident House Number",
@@ -252,30 +224,77 @@
             }
           ]
         },
-        "gender": {
+        "personal_administrative_number": {
           "mandatory": false,
-          "source":"user",
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
-              "name": "Gender",
+              "name": "Personal Administrative Number",
+              "locale": "en"
+            }
+          ]
+        },
+        "sex": {
+          "mandatory": false,
+          "source": "user",
+          "value_type": "uint",
+          "display": [
+            {
+              "name": "Sex",
+              "locale": "en"
+            }
+          ]
+        },
+        "email_address": {
+          "mandatory": false,
+          "value_type": "string",
+          "source": "user",
+          "display": [
+            {
+              "name": "Email Address",
+              "locale": "en"
+            }
+          ]
+        },
+        "mobile_phone_number": {
+          "mandatory": false,
+          "value_type": "string",
+          "source": "user",
+          "display": [
+            {
+              "name": "Mobile Phone Number",
               "locale": "en"
             }
           ]
         },
         "nationality": {
-          "mandatory": false,
-          "source":"user",
-          "value_type":"string",
+          "mandatory": true,
+          "source": "user",
+          "value_type": "nationalities",
           "display": [
             {
               "name": "Nationality",
               "locale": "en"
             }
-          ]
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 0,
+              "max": "n"
+            },
+            "nationalities": {
+              "country_code": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              }
+            }
+          }
         },
         "issuance_date": {
           "mandatory": true,
-          "source":"issuer",
+          "source": "issuer",
           "display": [
             {
               "name": "Issuance Date",
@@ -285,7 +304,7 @@
         },
         "expiry_date": {
           "mandatory": true,
-          "source":"issuer",
+          "source": "issuer",
           "display": [
             {
               "name": "Expiry Date",
@@ -295,7 +314,7 @@
         },
         "issuing_authority": {
           "mandatory": true,
-          "source":"issuer",
+          "source": "issuer",
           "display": [
             {
               "name": "Issuance Authority",
@@ -305,6 +324,8 @@
         },
         "document_number": {
           "mandatory": false,
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Document Number",
@@ -312,18 +333,31 @@
             }
           ]
         },
-        "administrative_number": {
+        "location_status": {
           "mandatory": false,
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
-              "name": "Administrative Number",
+              "name": "Location Status",
+              "locale": "en"
+            }
+          ]
+        },
+        "trust_anchor": {
+          "mandatory": false,
+          "value_type": "string",
+          "source": "user",
+          "display": [
+            {
+              "name": "Trust Anchor",
               "locale": "en"
             }
           ]
         },
         "issuing_country": {
           "mandatory": true,
-          "source":"issuer",
+          "source": "issuer",
           "display": [
             {
               "name": "Issuing Country",
@@ -331,12 +365,13 @@
             }
           ]
         },
-        "portrait_capture_date": {
+        "portrait": {
           "mandatory": false,
-          "source":"user",
+          "value_type": "jpeg",
+          "source": "user",
           "display": [
             {
-              "name": "Portrait Capture Date",
+              "name": "Portrait Image",
               "locale": "en"
             }
           ]
@@ -346,15 +381,6 @@
           "display": [
             {
               "name": "Issuing Jurisdiction",
-              "locale": "en"
-            }
-          ]
-        },
-        "portrait": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Portait of the user.",
               "locale": "en"
             }
           ]

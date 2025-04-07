@@ -83,7 +83,7 @@ def mdl_test_case_form():
 
     mdl_data["mDL"].update(
         {
-            "issuing_country": session["country"],
+            "issuing_country": "LT",
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
@@ -108,7 +108,7 @@ def mdl_test_case_form():
 
     mdl_data["mDL"].update({"issue_date": today.strftime("%Y-%m-%d")})
     mdl_data["mDL"].update({"expiry_date": expiry.strftime("%Y-%m-%d")})
-    mdl_data["mDL"].update({"issuing_country": "LT"}),
+    mdl_data["mDL"].update({"issuing_country": "LT"})
     mdl_data["mDL"].update({"issuing_authority": doctype_config["issuing_authority"]})
     mdl_data["mDL"].update(
         {
@@ -117,7 +117,7 @@ def mdl_test_case_form():
             )
         }
     )
-    mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
+    mdl_data["mDL"].update({"un_distinguishing_sign": "LT"})
 
     user_id = f"{session["country"]}.{user_id}"
 

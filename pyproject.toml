@@ -36,8 +36,8 @@ pymdoccbor = { git = "https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.
 idpyoidc = { git = "https://github.com/eu-digital-identity-wallet/idpy-oidc.git" }
 openid4v = { git = "https://github.com/eu-digital-identity-wallet/openid4v.git" }
 sd-jwt = { git = "https://github.com/openwallet-foundation-labs/sd-jwt-python.git", rev = "v0.10.4-1" }
-fedservice = { git = "https://github.com/rohe/fedservice.git" }
-idpysdjwt = { git = "https://github.com/rohe/idpy-sdjwt.git" }
+#fedservice = { git = "https://github.com/rohe/fedservice.git", rev="a4bef2e3f230f4b07c6ef45e4c8be55778d0561e" }
+idpysdjwt = { git = "https://github.com/rohe/idpy-sdjwt.git", rev="de1715ef89c7f3db5daf3cdc53fec26d6ade03d9" }
 google-cloud-logging = "^3.11.2"
 
 [tool.poetry.group.dev.dependencies]

@@ -220,7 +220,7 @@ def preauth_form():
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
-        presentation_data[credential].update({"issuing_country": "FC"}),
+        presentation_data[credential].update({"issuing_country": "FC"})
         presentation_data[credential].update(
             {"issuing_authority": doctype_config["issuing_authority"]}
         )
