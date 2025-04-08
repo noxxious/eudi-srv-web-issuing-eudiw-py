@@ -4,7 +4,7 @@ version = "0.7.0"
 description = "The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service, supporting the OpenId4VCI (draft 13) protocol."
 authors = ["EU Digital Identity Wallet"]
 readme = "README.md"
-license = "Apache"
+license = "Apache Licence 2.0"
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]

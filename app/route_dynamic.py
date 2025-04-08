@@ -28,6 +28,7 @@ from datetime import timedelta
 import io
 import json
 import base64
+from typing import Any
 from uuid import uuid4
 from PIL import Image
 from flask import Blueprint, Flask, redirect, render_template, request, session, jsonify
@@ -532,12 +533,12 @@ def red():
     )
 
     data = dynamic_R2_data_collect(
-        country=session["country"], user_id=session["access_token"]
+        country=session["country"], user_id=session["access_token"], country_config=country_config
     )
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    presentation_data = dict()
+    presentation_data = {}
 
     for credential_requested in session["credentials_requested"]:
 
@@ -572,7 +573,8 @@ def red():
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
-        presentation_data[credential].update({"issuing_country": session["country"]})
+        if "issuing_country" not in presentation_data[credential]:
+            presentation_data[credential].update({"issuing_country": session["country"]})
         presentation_data[credential].update(
             {"issuing_authority": doctype_config["issuing_authority"]}
         )
@@ -636,12 +638,12 @@ def dynamic_R2():
 
     """
 
-    json_request = request.json
+    json_request: dict[str, Any] = request.json
 
     (v, l) = validate_mandatory_args(json_request, ["user_id", "credential_requests"])
 
     if not v:
-        return {
+        return jsonify(
             "error": "invalid_credential_request",
             "error_description": "missing fields in json",
         }
@@ -665,7 +667,7 @@ def dynamic_R2():
     )
 
     if "error" in data:
-        return data
+        return jsonify(data)
 
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
 
@@ -679,7 +681,7 @@ def dynamic_R2():
     return jsonify(credential_response), 200
 
 
-def dynamic_R2_data_collect(country, user_id, country_config):
+def dynamic_R2_data_collect(country: str, user_id:str, country_config):
     """
     Funtion to get attributes from selected credential issuer country
 
@@ -688,9 +690,9 @@ def dynamic_R2_data_collect(country, user_id, country_config):
     country -- credential issuing country that user selected
     """
     if country == "FC":
-        data = form_dynamic_data.get(user_id, "Data not found")
+        data = form_dynamic_data.get(user_id, {})
 
-        if data == "Data not found":
+        if not data:
             return {"error": "error", "error_description": "Data not found"}
 
         session["version"] = cfgserv.current_version
@@ -698,9 +700,9 @@ def dynamic_R2_data_collect(country, user_id, country_config):
 
         return data
     elif country_config["connection_type"] == "testcase":
-        data = form_dynamic_data.get(user_id, "Data not found")
+        data = form_dynamic_data.get(user_id, {})
 
-        if data == "Data not found":
+        if not data:
             return {"error": "error", "error_description": "Data not found"}
 
         session["version"] = cfgserv.current_version
@@ -709,9 +711,9 @@ def dynamic_R2_data_collect(country, user_id, country_config):
         return data
 
     if country == "sample":
-        data = form_dynamic_data.get(user_id, "Data not found")
+        data = form_dynamic_data.get(user_id, {})
 
-        if data == "Data not found":
+        if not data:
             return {"error": "error", "error_description": "Data not found"}
 
         session["version"] = cfgserv.current_version
@@ -737,7 +739,7 @@ def dynamic_R2_data_collect(country, user_id, country_config):
         try:
             r2 = requests.get(url)
 
-            json_response = r2.json()
+            json_response: dict[str, Any] = r2.json()
             for attribute in json_response:
                 if attribute["state"] == "Pending":
                     return {"error": "Pending", "response": json_response}
@@ -792,7 +794,7 @@ def dynamic_R2_data_collect(country, user_id, country_config):
         credential_error_resp("invalid_credential_request", "Not supported")
 
 
-def credentialCreation(credential_request, data, country, country_config):
+def credentialCreation(credential_request, data, country: str, country_config):
     """
     Function to create credentials requested by user
 
@@ -906,9 +908,14 @@ def credentialCreation(credential_request, data, country, country_config):
         form_data.update(
             {
                 "version": session["version"],
-                "issuing_country": session["country"],
             }
         )
+        if "issuing_country" not in form_data:
+            form_data.update(
+                {
+                    "issuing_country": session["country"],
+                }
+            )
 
         pdata = dynamic_formatter(
             format, doctype, form_data, device_publickey, country_config
@@ -949,6 +956,12 @@ def auth():
         return redirect(urljoin(cfgserv.service_url, "oid4vp"))
     elif choice == "link2":
         return redirect(urljoin(cfgserv.service_url, "dynamic/"))
+    else:
+        return authentication_error_redirect(
+            jws_token=authorization_params["token"],
+            error="Invalid auth choice",
+            error_description=f"User provided invalid auth choice {choice}",
+        )
 
 
 @dynamic.route("/form", methods=["GET", "POST"])
@@ -1044,10 +1057,16 @@ def Dynamic_form():
     cleaned_data.update(
         {
             "version": session["version"],
-            "issuing_country": session["country"],
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
+    if not cleaned_data.get("issuing_coutry", None):
+        cleaned_data.update(
+            {
+                "issuing_country": session["country"],
+            }
+        )
+    
 
     form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update(

@@ -16,7 +16,7 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -28,9 +28,7 @@ from werkzeug import datastructures
 from cryptography import x509
 
 
-def validate_mandatory_args(
-    args: datastructures.ImmutableMultiDict[str, str], mandlist: List[str]
-):
+def validate_mandatory_args(args: dict[str, str], mandlist: list[str]):
     """Validate mandatory query arguments.
     Verify if all the members of mandlist have a value in args
 
@@ -52,7 +50,7 @@ def validate_mandatory_args(
     return (b, l)
 
 
-def validate_cert_algo(certificate, lalgo):
+def validate_cert_algo(certificate: bytes, lalgo):
     """Validate if certificate algorithm and curve is in the list (lalgo) of supported algorithms
 
     Keyword arguments:

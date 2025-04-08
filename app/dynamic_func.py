@@ -17,8 +17,10 @@
 ###############################################################################
 import datetime
 import json
+from typing import Any, Literal
 from urllib.parse import urljoin
 from flask import session
+from google.api_core.exceptions import InvalidArgument
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
 from misc import (
@@ -50,6 +52,8 @@ def dynamic_formatter(format, doctype, form_data, device_publickey, country_conf
 
     elif format == "vc+sd-jwt":
         url = urljoin(cfgserv.service_url, "formatter/sd-jwt")
+    else:
+        raise InvalidArgument(f"Invalid format '{format}' requested")
 
     r = json_post(
         url,
@@ -70,11 +74,18 @@ def dynamic_formatter(format, doctype, form_data, device_publickey, country_conf
         credential = mdoc.decode("utf-8")
     elif format == "vc+sd-jwt":
         credential = r["sd-jwt"]
+    else:
+        raise InvalidArgument(f"Invalid format '{format}' requested")
 
     return credential
 
 
-def formatter(data, un_distinguishing_sign, doctype, format):
+def formatter(
+    data,
+    un_distinguishing_sign: str,
+    doctype,
+    format: Literal["mso_mdoc"] | Literal["vc+sd-jwt"],
+):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     today = datetime.date.today()
 
@@ -88,6 +99,10 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             expiry = today + datetime.timedelta(days=doctype_config["validity"])
 
             namescapes = credentialsSupported[request]["claims"]
+            issuer_claims: dict[str, Any] = {}
+            attributes_req: dict[str, Any] = {}
+            attributes_req2: dict[str, Any] = {}
+            pdata: dict[str, Any] = {}
 
             if format == "mso_mdoc":
                 for namescape in namescapes:
@@ -136,6 +151,8 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                     )
 
                     pdata["claims"] = {namescape: {}}
+            else:
+                raise InvalidArgument(f"Invalid format '{format}' requested")
 
             # add optional age_over_18 to mdl
             """ if doctype == "org.iso.18013.5.1.mDL" or doctype == "eu.europa.ec.eudi.pid.1":
@@ -183,34 +200,41 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 "issuance_date":"",
                 }) """
 
-            
-            if ("driving_privileges" in attributes_req) and isinstance(data["driving_privileges"], str):
+            if ("driving_privileges" in attributes_req) and isinstance(
+                data["driving_privileges"], str
+            ):
                 print("dynamic_func_data: " + str(data))
                 json_priv = json.loads(data["driving_privileges"])
                 data.update({"driving_privileges": json_priv})
 
             if format == "mso_mdoc":
-                for attribute in attributes_req:
-                    pdata[namescape].update({attribute: data[attribute]})
-
-                for attribute in attributes_req2:
-                    if attribute in data:
+                for namescape in namescapes:
+                    for attribute in attributes_req:
                         pdata[namescape].update({attribute: data[attribute]})
 
-                for attribute in issuer_claims:
-                    if attribute in data:
-                        pdata[namescape].update({attribute: data[attribute]})
+                    for attribute in attributes_req2:
+                        if attribute in data:
+                            pdata[namescape].update({attribute: data[attribute]})
+
+                    for attribute in issuer_claims:
+                        if attribute in data:
+                            pdata[namescape].update({attribute: data[attribute]})
 
             elif format == "vc+sd-jwt":
-                for attribute in attributes_req:
-                    pdata["claims"][namescape].update({attribute: data[attribute]})
-
-                for attribute in attributes_req2:
-                    if attribute in data:
+                for namescape in namescapes:
+                    for attribute in attributes_req:
                         pdata["claims"][namescape].update({attribute: data[attribute]})
 
-                for attribute in issuer_claims:
-                    if attribute in data:
-                        pdata["claims"][namescape].update({attribute: data[attribute]})
+                    for attribute in attributes_req2:
+                        if attribute in data:
+                            pdata["claims"][namescape].update(
+                                {attribute: data[attribute]}
+                            )
+
+                    for attribute in issuer_claims:
+                        if attribute in data:
+                            pdata["claims"][namescape].update(
+                                {attribute: data[attribute]}
+                            )
 
             return pdata

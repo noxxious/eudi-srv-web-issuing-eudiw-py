@@ -16,7 +16,7 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -107,7 +107,7 @@ def create_request(country, loa):
     return "<base href=" + cfgserv.eidasnode_url + ">\n" + response.text
 
 
-def handle_response(token):
+def handle_response(token: sr):
     """Handles the response to /eidasnode/lightrequest sent by the eIDAS node. Connect to LightToken client to retrieve the attributes that the end-user agreed to share/disclose.
 
     Keyword arguments:
@@ -133,12 +133,14 @@ def handle_response(token):
     status_elements = root.findall(".//ns:status", namespace)
 
     # Retrieve status information
+    failure = "false"
+    status_message = ""
     for status in status_elements:
         failure = status.find("ns:failure", namespace).text
         status_message = status.find("ns:statusMessage", namespace).text
 
     if failure == "true":
-        return False, status_message
+        return False, {"error": status_message}
 
     # Find attribute elements
     attribute_elements = root.findall(".//ns:attribute", namespace)

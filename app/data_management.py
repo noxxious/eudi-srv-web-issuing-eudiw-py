@@ -22,6 +22,7 @@ This manages necessary data and it's removal
 import json
 import threading
 from datetime import datetime
+from typing import Any
 from urllib.parse import urljoin
 
 from .app_config.config_service import ConfService as cfgservice
@@ -32,8 +33,8 @@ parRequests = {}
 transaction_codes = {}
 deferredRequests = {}
 oid4vp_requests = {}
-form_dynamic_data = {}
-session_ids: dict[str, dict] = {}
+form_dynamic_data: dict[str, dict[str, Any]] = {}
+session_ids: dict[str, dict[str, Any]] = {}
 
 
 def getSessionId_requestUri(target_request_uri: str | None):
