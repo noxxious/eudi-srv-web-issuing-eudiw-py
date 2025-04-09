@@ -308,17 +308,12 @@ def scope2details(scope):
 
 
 def credential_error_resp(error, desc):
-    return (
-        jsonify(
-            {
-                "error": error,
-                "error_description": desc,
-                "c_nonce": secrets.token_urlsafe(16),
-                "c_nonce_expires_in": 86400,
-            }
-        ),
-        400,
-    )
+    return {
+        "error": error,
+        "error_description": desc,
+        "c_nonce": secrets.token_urlsafe(16),
+        "c_nonce_expires_in": 86400,
+    }
 
 
 # Error redirection to the wallet during authentication

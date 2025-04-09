@@ -107,7 +107,7 @@ def create_request(country, loa):
     return "<base href=" + cfgserv.eidasnode_url + ">\n" + response.text
 
 
-def handle_response(token: sr):
+def handle_response(token: str):
     """Handles the response to /eidasnode/lightrequest sent by the eIDAS node. Connect to LightToken client to retrieve the attributes that the end-user agreed to share/disclose.
 
     Keyword arguments:

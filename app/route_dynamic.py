@@ -170,7 +170,7 @@ def Supported_Countries():
     )
 
 
-def dynamic_R1(country):
+def dynamic_R1(country: str):
     """
     Function to create url to redirect to the selected credential issuer country
 
@@ -306,6 +306,10 @@ def dynamic_R1(country):
                 url = url + "&" + url_part + "=" + country_data[url_part]
 
         return redirect(url)
+    return (
+        jsonify({"error": f"Invalid country configuration for country '{country}'"}),
+        500,
+    )
 
 
 @dynamic.route("/redirect", methods=["GET", "POST"])
@@ -337,6 +341,13 @@ def red():
             )
 
         token = request.args.get("access_token")
+        if not token:
+            return authentication_error_redirect(
+                jws_token=session["jws_token"],
+                error="Missing authentication token",
+                error_description="Missing authentication token",
+            )
+
         r1 = requests.post(
             "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
             json={"token": token},
@@ -352,14 +363,20 @@ def red():
             + " -  entered the route"
         )
 
-        data = dynamic_R2_data_collect(
+        data, valid = dynamic_R2_data_collect(
             country=session["country"],
             user_id=token
             + "&authenticationContextId="
             + r1.json()["authenticationContextId"],
+            country_config=country_config,
         )
 
-        if "error" in data and data["error"] == "Pending" and "response" in data:
+        if (
+            not valid
+            or "error" in data
+            and data["error"] == "Pending"
+            and "response" in data
+        ):
             data = data["response"]
 
         """ i = 0
@@ -477,8 +494,15 @@ def red():
         )
 
     elif session["country"] is None:
+        state = request.args.get("state")
+        if not state:
+            return authentication_error_redirect(
+                jws_token=session["jws_token"],
+                error="Missing state",
+                error_description="Missing state",
+            )
 
-        country, jws_token = request.args.get("state").split(".")
+        country, jws_token = state.split(".")
         session["jws_token"] = jws_token
         session["country"] = country
 
@@ -502,7 +526,15 @@ def red():
     # url = redirect_data["url"]
     headers = redirect_data["headers"]
 
-    data = "code=" + request.args.get("code")
+    code = request.args.get("code")
+    if not code:
+        return authentication_error_redirect(
+            jws_token=session["jws_token"],
+            error="Missing auth code",
+            error_description="Missing auth code",
+        )
+
+    data = f"code={code}"
     for key in redirect_data:
         if key != "headers":
             data = data + "&" + key + "=" + redirect_data[key]
@@ -532,13 +564,17 @@ def red():
         + " -  entered the route"
     )
 
-    data = dynamic_R2_data_collect(
-        country=session["country"], user_id=session["access_token"], country_config=country_config
+    data, valid = dynamic_R2_data_collect(
+        country=session["country"],
+        user_id=session["access_token"],
+        country_config=country_config,
     )
+    if not valid:
+        return jsonify(data), 400
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    presentation_data = {}
+    presentation_data: dict[str, Any] = {}
 
     for credential_requested in session["credentials_requested"]:
 
@@ -574,12 +610,14 @@ def red():
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
         if "issuing_country" not in presentation_data[credential]:
-            presentation_data[credential].update({"issuing_country": session["country"]})
+            presentation_data[credential].update(
+                {"issuing_country": session["country"]}
+            )
         presentation_data[credential].update(
             {"issuing_authority": doctype_config["issuing_authority"]}
         )
         if "credential_type" in doctype_config:
-            presentation_data[doctype].update(
+            presentation_data[credential].update(
                 {"credential_type": doctype_config["credential_type"]}
             )
 
@@ -644,9 +682,11 @@ def dynamic_R2():
 
     if not v:
         return jsonify(
-            "error": "invalid_credential_request",
-            "error_description": "missing fields in json",
-        }
+            {
+                "error": "invalid_credential_request",
+                "error_description": "missing fields in json",
+            }
+        )
 
     user = json_request["user_id"]
 
@@ -681,7 +721,7 @@ def dynamic_R2():
     return jsonify(credential_response), 200
 
 
-def dynamic_R2_data_collect(country: str, user_id:str, country_config):
+def dynamic_R2_data_collect(country: str, user_id: str, country_config):
     """
     Funtion to get attributes from selected credential issuer country
 
@@ -693,33 +733,33 @@ def dynamic_R2_data_collect(country: str, user_id:str, country_config):
         data = form_dynamic_data.get(user_id, {})
 
         if not data:
-            return {"error": "error", "error_description": "Data not found"}
+            return {"error": "error", "error_description": "Data not found"}, False
 
         session["version"] = cfgserv.current_version
         session["country"] = data["issuing_country"]
 
-        return data
+        return data, True
     elif country_config["connection_type"] == "testcase":
         data = form_dynamic_data.get(user_id, {})
 
         if not data:
-            return {"error": "error", "error_description": "Data not found"}
+            return {"error": "error", "error_description": "Data not found"}, False
 
         session["version"] = cfgserv.current_version
         session["country"] = country
 
-        return data
+        return data, True
 
     if country == "sample":
         data = form_dynamic_data.get(user_id, {})
 
         if not data:
-            return {"error": "error", "error_description": "Data not found"}
+            return {"error": "error", "error_description": "Data not found"}, False
 
         session["version"] = cfgserv.current_version
         session["country"] = data["issuing_country"]
 
-        return data
+        return data, True
 
     elif country_config["connection_type"] == "eidasnode":
         (b, data) = handle_response(user_id)
@@ -730,7 +770,7 @@ def dynamic_R2_data_collect(country: str, user_id:str, country_config):
                 if custom_modifiers[modifier] in data:
                     data[modifier] = data[custom_modifiers[modifier]]
                     data.pop(custom_modifiers[modifier])
-        return data
+        return data, True
 
     elif country_config["connection_type"] == "oauth":
         attribute_request = country_config["attribute_request"]
@@ -740,16 +780,19 @@ def dynamic_R2_data_collect(country: str, user_id:str, country_config):
             r2 = requests.get(url)
 
             json_response: dict[str, Any] = r2.json()
-            for attribute in json_response:
+            for attribute in json_response.values():
                 if attribute["state"] == "Pending":
-                    return {"error": "Pending", "response": json_response}
+                    return {"error": "Pending", "response": json_response}, False
 
             data = json_response
 
-            return data
+            return data, True
         except:
-            credential_error_resp(
-                "invalid_credential_request", "openid connection failed"
+            return (
+                credential_error_resp(
+                    "invalid_credential_request", "openid connection failed"
+                ),
+                False,
             )
 
     elif country_config["connection_type"] == "openid":
@@ -785,13 +828,19 @@ def dynamic_R2_data_collect(country: str, user_id:str, country_config):
                         data[modifier] = data[custom_modifiers[modifier]]
                         data.pop(custom_modifiers[modifier])
 
-            return data
+            return data, True
         except:
-            credential_error_resp(
-                "invalid_credential_request", "openid connection failed"
+            return (
+                credential_error_resp(
+                    "invalid_credential_request", "openid connection failed"
+                ),
+                False,
             )
     else:
-        credential_error_resp("invalid_credential_request", "Not supported")
+        return (
+            credential_error_resp("invalid_credential_request", "Not supported"),
+            False,
+        )
 
 
 def credentialCreation(credential_request, data, country: str, country_config):
@@ -1066,7 +1115,6 @@ def Dynamic_form():
                 "issuing_country": session["country"],
             }
         )
-    
 
     form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update(
