@@ -24,13 +24,11 @@ This misc.py file includes different miscellaneous functions.
 """
 import datetime
 
-# from app.route_oidc import authentication_error_redirect
 from io import BytesIO
 import secrets
-from urllib import request
 from PIL import Image
 from app import oidc_metadata
-from flask import jsonify, current_app, redirect
+from flask import current_app, redirect
 from flask.helpers import make_response
 from redirect_func import url_get
 import json

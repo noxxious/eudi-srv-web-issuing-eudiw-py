@@ -131,7 +131,6 @@ def validate_vp_token(response_json, credentials_requested):
         attributes_received = []
 
         for n in namespaces.keys():
-            l = []
             for e in namespaces[n]:  # e is a CBORTag
                 val = cbor2.decoder.loads(e.value)
                 id = val["elementIdentifier"]

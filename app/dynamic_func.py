@@ -22,7 +22,6 @@ from urllib.parse import urljoin
 from flask import session
 from google.api_core.exceptions import InvalidArgument
 from app_config.config_service import ConfService as cfgserv
-from app_config.config_countries import ConfCountries as cfgcountries
 from misc import (
     calculate_age,
     getIssuerFilledAttributes,
@@ -30,11 +29,7 @@ from misc import (
     getOptionalAttributes,
 )
 from redirect_func import json_post
-import base64
-from flask import session
 from app_config.config_service import ConfService as cfgserv
-from misc import calculate_age
-from redirect_func import json_post
 from app import oidc_metadata
 
 

@@ -54,8 +54,6 @@ from flask_cors import CORS
 from idpyoidc.message.oidc import AuthorizationRequest
 from idpyoidc.message.oauth2 import ResponseMessage
 import json
-import sys
-from typing import Union
 from urllib.parse import urljoin, urlparse, urlencode
 
 from idpyoidc.message.oidc import AccessTokenRequest
@@ -82,9 +80,6 @@ from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
 from . import oidc_metadata, openid_metadata, oauth_metadata
 
-oidc = Blueprint("oidc", __name__, url_prefix="/")
-CORS(oidc)  # enable CORS on the blue print
-
 # variable for PAR requests
 from app.data_management import (
     getSessionId_accessToken,
@@ -96,6 +91,8 @@ from app.data_management import (
     getSessionId_authCode,
 )
 
+oidc = Blueprint("oidc", __name__, url_prefix="/")
+CORS(oidc)  # enable CORS on the blue print
 
 def _add_cookie(resp: Response, cookie_spec: dict):
     kwargs = {k: v for k, v in cookie_spec.items() if k not in ("name",)}

@@ -31,7 +31,6 @@ import datetime
 import hashlib
 import requests
 from sd_jwt.common import SDObj
-from sd_jwt import __version__
 from sd_jwt.utils.demo_utils import get_jwk
 from sd_jwt.issuer import SDJWTIssuer
 import jwt

@@ -37,10 +37,9 @@ from flask_cors import CORS
 import requests
 from app.lighttoken import handle_response
 from urllib.parse import urljoin
-from pathlib import Path
-from app.test_cases.helper import *
+#from app.test_cases.helper import *
 
-from boot_validate import (
+from validate import (
     validate_mandatory_args,
 )
 
@@ -1055,6 +1054,7 @@ def Dynamic_form():
 
     form_data.pop("proceed")
     cleaned_data = {}
+    country_config = cfgcountries.supported_countries[session["country"]]
     for item in form_data:
 
         if item == "portrait":
@@ -1073,7 +1073,7 @@ def Dynamic_form():
 
                 response, error_msg = validate_image(portrait)
 
-                if response == False:
+                if not response:
                     return authentication_error_redirect(
                         jws_token=session["jws_token"],
                         error="Invalid Image",
@@ -1173,7 +1173,10 @@ def Dynamic_form():
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
-        presentation_data[credential].update({"issuing_country": session["country"]})
+
+        if not cleaned_data.get("issuing_country"):
+            presentation_data[credential].update({"issuing_country": country_config[session["country"]]["un_distinguishing_sign"]})
+
         presentation_data[credential].update(
             {"issuing_authority": doctype_config["issuing_authority"]}
         )

@@ -16,24 +16,16 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
 This route_formatter.py file is the blueprint for the route /formatter of the PID Issuer Web service.
 """
-import logging
-
-
+from typing import Any
 from flask import (
     Blueprint,
-    flash,
-    g,
-    redirect,
-    render_template,
     request,
-    session,
-    url_for,
     jsonify,
 )
 
@@ -45,9 +37,6 @@ from app_config.config_countries import ConfCountries as cfcountries
 
 # /formatter blueprint
 formatter = Blueprint("formatter", __name__, url_prefix="/formatter")
-
-# Log
-logger = logging.getLogger()
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------
@@ -88,10 +77,11 @@ def cborformatter():
     + error_message - Error information.
     """
 
-    (b, l) = validate_mandatory_args(
-        request.json, ["version", "country", "doctype", "device_publickey", "data"]
+    attestation_data: dict[str, Any] | None = request.json
+    (valid, _) = validate_mandatory_args(
+        attestation_data, ["version", "country", "doctype", "device_publickey", "data"]
     )
-    if not b:  # nota all mandatory args are present
+    if not valid or not attestation_data:  # nota all mandatory args are present
         return jsonify(
             {
                 "error_code": 401,
@@ -99,13 +89,13 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-    
-    if request.json["version"] not in cfgservice.getpid_or_mdl_response_field:
+
+    if attestation_data["version"] not in cfgservice.getpid_or_mdl_response_field:
         return jsonify(
             {"error_code": 13, "error_message": cfgservice.error_list["13"], "mdoc": ""}
         )
-    
-    if request.json["country"] not in cfcountries.supported_countries:
+
+    if attestation_data["country"] not in cfcountries.supported_countries:
         return jsonify(
             {
                 "error_code": 102,
@@ -114,9 +104,9 @@ def cborformatter():
             }
         )
 
-    if request.json["doctype"] == "org.iso.18013.5.1.mDL":
-        (b, l) = validate_mandatory_args(
-            request.json["data"]["org.iso.18013.5.1"],
+    if attestation_data["doctype"] == "org.iso.18013.5.1.mDL":
+        (valid, _) = validate_mandatory_args(
+            attestation_data["data"]["org.iso.18013.5.1"],
             [
                 "family_name",
                 "given_name",
@@ -132,15 +122,15 @@ def cborformatter():
             ],
         )
 
-    if request.json["doctype"] == "eu.europa.ec.eudi.pid.1":
-        (b, l) = validate_mandatory_args(
-            request.json["data"]["eu.europa.ec.eudi.pid.1"],
+    if attestation_data["doctype"] == "eu.europa.ec.eudi.pid.1":
+        (valid, _) = validate_mandatory_args(
+            attestation_data["data"]["eu.europa.ec.eudi.pid.1"],
             ["family_name", "given_name", "birth_date", "age_over_18"],
         )
 
-    if request.json["doctype"] == "org.iso.18013.5.1.mDL":
-        expiry_date = request.json["data"]["org.iso.18013.5.1"].get("expiry_date")
-        issue_date = request.json["data"]["org.iso.18013.5.1"].get("issue_date")
+    if attestation_data["doctype"] == "org.iso.18013.5.1.mDL":
+        expiry_date = attestation_data["data"]["org.iso.18013.5.1"].get("expiry_date")
+        issue_date = attestation_data["data"]["org.iso.18013.5.1"].get("issue_date")
 
         if expiry_date is not None:
             if not validate_date_format(expiry_date):
@@ -161,7 +151,7 @@ def cborformatter():
                     }
                 )
 
-    if not b:  # nota all mandatory args are present
+    if not valid:  # nota all mandatory args are present
         return jsonify(
             {
                 "error_code": 401,
@@ -169,12 +159,12 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-    
+
     base64_mdoc = mdocFormatter(
-        request.json["data"],
-        request.json["doctype"],
-        request.json["country"],
-        request.json["device_publickey"],
+        attestation_data["data"],
+        attestation_data["doctype"],
+        attestation_data["country"],
+        attestation_data["device_publickey"],
     )
 
     return jsonify(
@@ -205,10 +195,11 @@ def sd_jwtformatter():
     + error_message - Error information.
     """
 
-    (b, l) = validate_mandatory_args(
-        request.json, ["version", "country", "doctype", "device_publickey", "data"]
+    attestation_data: dict[str, Any] | None = request.json
+    (valid, _) = validate_mandatory_args(
+        attestation_data, ["version", "country", "doctype", "device_publickey", "data"]
     )
-    if not b:  # nota all mandatory args are present
+    if not valid or not attestation_data:  # nota all mandatory args are present
         return jsonify(
             {
                 "error_code": 401,
@@ -238,11 +229,11 @@ def sd_jwtformatter():
         )
 
     if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
-        (b, l) = validate_mandatory_args(
+        (valid, _) = validate_mandatory_args(
             PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"],
             ["family_name", "given_name", "birth_date", "age_over_18"],
         )
-    if not b:  # nota all mandatory args are present
+    if not valid:  # nota all mandatory args are present
         return jsonify(
             {
                 "error_code": 401,
@@ -263,7 +254,7 @@ def sd_jwtformatter():
 
     # return error_message
 
-    sd_jwt = sdjwtFormatter(PID, request.json["country"])
+    sd_jwt = sdjwtFormatter(PID, attestation_data["country"])
 
     return jsonify(
         {"error_code": 0, "error_message": cfgservice.error_list["0"], "sd-jwt": sd_jwt}

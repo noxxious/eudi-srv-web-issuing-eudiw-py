@@ -28,7 +28,6 @@ import random
 from PIL import Image
 from flask import (
     Blueprint,
-    current_app,
     make_response,
     render_template,
     request,
@@ -50,6 +49,7 @@ from app.misc import (
     generate_unique_id,
     getAttributesForm,
     getAttributesForm2,
+    oidc_server,
     validate_image,
 )
 
@@ -134,7 +134,7 @@ def preauth_form():
 
                 response, error_msg = validate_image(portrait)
 
-                if response == False:
+                if not response:
                     return render_template("misc/500.html", error="Invalid Image")
                 else:
                     imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(

@@ -16,7 +16,7 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -33,7 +33,7 @@ from werkzeug import datastructures
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from tinyec import registry, ec
+from cryptography.hazmat.primitives.asymmetric import ec
 from flask_api import status
 from urllib.parse import urlparse
 
@@ -43,7 +43,7 @@ from app_config.config_countries import ConfCountries as cfgcountries
 
 
 # Log
-#from app_config.config_service import ConfService as log
+# from app_config.config_service import ConfService as log
 
 
 def validate_mandatory_args(
@@ -70,7 +70,31 @@ def validate_mandatory_args(
     return (b, l)
 
 
-def validate_cert_algo(certificate, lalgo):
+def validate_mandatory_args(args: dict[str, str] | None, mandlist: list[str]):
+    """Validate mandatory query arguments.
+    Verify if all the members of mandlist have a value in args
+
+    Keyword arguments:
+    + args -- list of query arguments
+    + mandlist -- list of strings that need to have a value in args
+
+    Return: Return tuple (bool, List[str]).
+    + If all the mandlist elements have a value in args, return (true, []).
+    + If there are mandlist elements that have not a value in args, return (false, l), where l is the list of all mandlist elements that have no value in args.
+    """
+    l = []
+    if not args:
+        return False, l
+
+    b = True
+    for m in mandlist:
+        if args.get(m) is None:
+            b = False
+            l.append(m)
+    return (b, l)
+
+
+def validate_cert_algo(certificate: bytes, lalgo: dict[str, list[str]]):
     """Validate if certificate algorithm and curve is in the list (lalgo) of supported algorithms
 
     Keyword arguments:
@@ -86,8 +110,13 @@ def validate_cert_algo(certificate, lalgo):
         cert = x509.load_pem_x509_certificate(certificate)
     except Exception as e:
         return (False, str(e), "unknown")
+
+    public_key = cert.public_key()
+    if not isinstance(public_key, ec.EllipticCurvePublicKey):
+        return (False, "Not an eliptic curve certificate", cert)
+
     algname = cert.signature_algorithm_oid._name
-    curvname = cert.public_key().curve.name
+    curvname = public_key.curve.name
 
     if algname not in lalgo:  # validate certificate algorithm
         return (False, algname, curvname)
