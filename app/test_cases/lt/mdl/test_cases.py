@@ -226,4 +226,50 @@ test_cases = {
             ],
         }
     },
+    "9": {
+        "mDL": {
+            "family_name": "Pavarde",
+            "given_name": "Vardas",
+            "birth_date": "2008-07-10",
+            "issue_date":"2017-03-17",
+            "expiry_date":"2027-03-17",
+            "document_number": "00111111",
+            "administrative_number": "46603180001",
+            "portrait": "F",
+            "driving_privileges": [
+                {"vehicle_category_code": "B1", "issue_date": "1990-04-20"},
+                {"vehicle_category_code": "B", "issue_date": "1990-04-20"},
+                {"vehicle_category_code": "AM", "issue_date": "1990-04-20"},
+            ],
+        }
+    },
+    "default": {
+        "mDL": {
+            "family_name": "Simpsoniene",
+            "given_name": "Marge",
+            "birth_date": "1966-03-18",
+            "issue_date": "2017-03-17",
+            "expiry_date": "2027-03-17",
+            "administrative_number": "46603180002",
+            "document_number": "00222222",
+            "portrait": "F",
+            "driving_privileges": [
+                {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "1990-04-20",
+                    "codes": [{"code": "1.06"}],
+                },
+                {
+                    "vehicle_category_code": "B",
+                    "issue_date": "1990-04-20",
+                    "codes": [{"code": "1.06"}],
+                },
+                {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "1990-04-20",
+                    "codes": [{"code": "1.06"}],
+                },
+            ],
+        }
+    },
 }
