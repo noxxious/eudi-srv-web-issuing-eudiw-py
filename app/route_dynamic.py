@@ -676,11 +676,11 @@ def dynamic_R2():
 
     """
 
-    json_request: dict[str, Any] = request.json
+    json_request: dict[str, Any] | None = request.json
 
     (v, l) = validate_mandatory_args(json_request, ["user_id", "credential_requests"])
 
-    if not v:
+    if not v or not json_request:
         return jsonify(
             {
                 "error": "invalid_credential_request",
@@ -700,13 +700,13 @@ def dynamic_R2():
 
     country_config = cfgcountries.configured_countries[country]
 
-    data = dynamic_R2_data_collect(
+    data, valid = dynamic_R2_data_collect(
         country=country,
         user_id=user_id,
         country_config=country_config,
     )
 
-    if "error" in data:
+    if not valid or "error" in data:
         return jsonify(data)
 
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
@@ -721,7 +721,9 @@ def dynamic_R2():
     return jsonify(credential_response), 200
 
 
-def dynamic_R2_data_collect(country: str, user_id: str, country_config):
+def dynamic_R2_data_collect(
+    country: str, user_id: str, country_config: dict[str, Any]
+) -> tuple[dict[str, Any], bool]:
     """
     Funtion to get attributes from selected credential issuer country
 
@@ -763,6 +765,8 @@ def dynamic_R2_data_collect(country: str, user_id: str, country_config):
 
     elif country_config["connection_type"] == "eidasnode":
         (b, data) = handle_response(user_id)
+        if not b:
+            return data, False
 
         if "custom_modifiers" in country_config:
             custom_modifiers = country_config["custom_modifiers"]
@@ -843,7 +847,9 @@ def dynamic_R2_data_collect(country: str, user_id: str, country_config):
         )
 
 
-def credentialCreation(credential_request, data, country: str, country_config):
+def credentialCreation(
+    credential_request, data: dict[str, Any], country: str, country_config
+):
     """
     Function to create credentials requested by user
 
@@ -886,7 +892,7 @@ def credentialCreation(credential_request, data, country: str, country_config):
 
         # formatting_functions = document_mappings[doctype]["formatting_functions"]
 
-        form_data = {}
+        form_data: dict[str, Any] = {}
         if country == "FC":
             form_data = data
 

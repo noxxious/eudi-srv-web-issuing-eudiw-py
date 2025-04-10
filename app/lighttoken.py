@@ -22,6 +22,7 @@ Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD
 
 This lighttoken.py file contains the eIDAS-node lightToken auxiliary functions.
 """
+from typing import Any
 from pyignite import Client
 import requests
 import datetime
@@ -107,7 +108,7 @@ def create_request(country, loa):
     return "<base href=" + cfgserv.eidasnode_url + ">\n" + response.text
 
 
-def handle_response(token: str):
+def handle_response(token: str) -> tuple[bool, dict[str, Any]]:
     """Handles the response to /eidasnode/lightrequest sent by the eIDAS node. Connect to LightToken client to retrieve the attributes that the end-user agreed to share/disclose.
 
     Keyword arguments:
@@ -136,20 +137,26 @@ def handle_response(token: str):
     failure = "false"
     status_message = ""
     for status in status_elements:
-        failure = status.find("ns:failure", namespace).text
-        status_message = status.find("ns:statusMessage", namespace).text
+        failure = status.find("ns:failure", namespace)
+        failure = failure.text if failure else None
+        status_message = status.find("ns:statusMessage", namespace)
+        status_message = status_message.text if status_message else None
 
-    if failure == "true":
+    if not failure or failure == "true":
         return False, {"error": status_message}
 
     # Find attribute elements
     attribute_elements = root.findall(".//ns:attribute", namespace)
 
     # Fill attributes dictionary
-    attributes = {}
+    attributes: dict[str, Any] = {}
     for attribute in attribute_elements:
-        definition = attribute.find("ns:definition", namespace).text
-        value_elements = attribute.findall("ns:value", namespace)
-        attributes[definition.split("/")[-1]] = value_elements[0].text
+        definition = attribute.find("ns:definition", namespace)
+        definition = definition.text if definition else None
+        if definition:
+            value_elements = attribute.findall("ns:value", namespace)
+            value = value_elements[0]
+            if value and value.text:
+                attributes[definition.split("/")[-1]] = value
 
     return True, attributes

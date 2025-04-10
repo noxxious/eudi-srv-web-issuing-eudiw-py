@@ -23,12 +23,11 @@ Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD
 This boot_validate.py file includes different validation functions.
 """
 
-from typing import List
-from werkzeug import datastructures
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography import x509
 
 
-def validate_mandatory_args(args: dict[str, str], mandlist: list[str]):
+def validate_mandatory_args(args: dict[str, str] | None, mandlist: list[str]):
     """Validate mandatory query arguments.
     Verify if all the members of mandlist have a value in args
 
@@ -41,8 +40,10 @@ def validate_mandatory_args(args: dict[str, str], mandlist: list[str]):
     + If there are mandlist elements that have not a value in args, return (false, l), where l is the list of all mandlist elements that have no value in args.
     """
     l = []
-    b = True
+    if not args:
+        return False, l
 
+    b = True
     for m in mandlist:
         if args.get(m) is None:
             b = False
@@ -50,7 +51,7 @@ def validate_mandatory_args(args: dict[str, str], mandlist: list[str]):
     return (b, l)
 
 
-def validate_cert_algo(certificate: bytes, lalgo):
+def validate_cert_algo(certificate: bytes, lalgo: dict[str, list[str]]):
     """Validate if certificate algorithm and curve is in the list (lalgo) of supported algorithms
 
     Keyword arguments:
@@ -66,8 +67,13 @@ def validate_cert_algo(certificate: bytes, lalgo):
         cert = x509.load_pem_x509_certificate(certificate)
     except Exception as e:
         return (False, str(e), "unknown")
+
+    public_key = cert.public_key()
+    if not isinstance(public_key, ec.EllipticCurvePublicKey):
+        return (False, "Not an eliptic curve certificate", cert)
+
     algname = cert.signature_algorithm_oid._name
-    curvname = cert.public_key().curve.name
+    curvname = public_key.curve.name
 
     if algname not in lalgo:  # validate certificate algorithm
         return (False, algname, curvname)
